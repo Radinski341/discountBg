@@ -1,0 +1,152 @@
+.profile-container{
+    width: 90%;
+    display: grid;
+    margin: 30px auto;
+    grid-template-columns: 25% 75%;
+}
+
+.profile-homepage-container{
+    width: 90%;
+    display: block;
+    margin: 0 auto;
+}
+
+.profile-content{
+    grid-column: 2 / span 1;
+    margin: 30px 0;
+}
+
+.profile-info{
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 30px;
+}
+
+.user-info{
+    display: grid;
+    grid-template-columns: 20% 70%;
+    column-gap: 10%;
+}
+
+.info-image{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-image img{
+    width: 30%;
+}
+
+.info-row{
+    display: grid;
+    grid-template-columns: 30% 70%;
+}
+
+.info-row p{
+    display: inline-block;
+}
+.info-row .info-value{
+    color: #666;
+}
+
+.info-row .info-key{
+
+}
+.block-button{
+    width: 100%;
+    height: fit-content;
+    margin-top: 20px;
+    border-top: 1px solid gray;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.block-button a{
+    text-decoration: none;
+    color: #0082e6;
+    width: 100%;
+    padding: 10px 0;
+    display: block;
+    margin: 0 auto;
+}
+
+.block-button:hover{
+    background-color: #e1e1e1;
+}
+
+.orders-and-favourites{
+    display: grid;
+    grid-template-columns: 48% 48%;
+    column-gap: 4%;
+    margin-top: 30px;
+}
+
+.oaf-block{
+    padding: 30px;
+    border-radius: 30px;
+    background-color: white;
+    width: 100%;
+}
+
+.oaf-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.oaf-content i{
+    font-size: 80px;
+}
+
+.oaf-content .orders{
+    color: blue;
+}
+
+.oaf-content .favourites{
+    color: red;
+}
+
+.oaf-content p{
+    font-size: 28px;
+    text-align: center;
+    margin-left: 10px;
+}
+
+@media only screen and (max-width: 1200px) {
+    .profile-container{
+        grid-template-columns: 100%;
+    }
+
+    .profile-content{
+        grid-column: 1 / span 1;
+    }
+
+    .profile-homepage-container{
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    .orders-and-favourites{
+        grid-template-columns: 100%;
+    }
+
+    .oaf-block{
+        margin-bottom: 30px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .user-info{
+        grid-template-columns: 100%;
+    }
+
+    .info-row{
+        grid-template-columns: 40% 60%;
+    }
+
+    .info-image{
+        display: none;
+    }
+}

@@ -1,0 +1,83 @@
+{% extends 'public/profile-base.html.twig' %}
+
+{% block profile_content %}
+<section>
+{% for order in orders %}
+    <div class="container pb-2">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+
+            <div class="col-12">
+                <div class="card card-stepper text-black" style="border-radius: 16px;">
+
+                    <div class="card-body p-2 p-lg-5">
+
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            <div>
+                                <h6 class="mb-0">ПОРЪЧКА <span class="text-primary font-weight-bold">#{{ order.id }}</span></h6>
+                            </div>
+                            <div class="d-none d-lg-block">
+                                <p>{{ order.orderTransactions | length > 1 ? 'Поръчани '~ order.orderTransactions | length ~ " продукта" : 'Поръчан 1 продукт' }}</p>
+                            </div>
+                            <div class="text-end">
+                                <a class="btn btn-primary" href="{{ path('app_public_order_info', {orderId: order.id}) }}">Виж поръчка</a>
+                            </div>
+                        </div>
+
+                        <ul id="progressbar-2" class="d-flex justify-content-between mx-0 mt-0 mb-5 px-0 pt-0 pb-2">
+                            <li class="step0 {{ order.statusStep > 1 ? 'active' : ''}} text-center" id="step1"></li>
+                            <li class="step0 {{ order.statusStep > 2 ? 'active' : ''}} text-center" id="step2"></li>
+                            <li class="step0 {{ order.statusStep > 3 ? 'active' : ''}} text-center" id="step3"></li>
+                            <li class="step0 {{ order.statusStep == 4 ? 'active' : ''}} text-muted text-end" id="step4"></li>
+                        </ul>
+
+                        <div class="d-flex justify-content-between">
+                            <div class="d-lg-flex align-items-center">
+                                <i class="bi bi-list-check fa-3x me-lg-4 mb-3 mb-lg-0"></i>
+                                <div>
+                                    <p class="fw-bold mb-0">Поръчано</p>
+                                </div>
+                            </div>
+                            <div class="d-lg-flex align-items-center">
+                                <i class="bi bi-hourglass-split fa-3x me-lg-4 mb-3 mb-lg-0"></i>
+                                <div>
+                                    <p class="fw-bold mb-0">В процес</p>
+                                </div>
+                            </div>
+                            <div class="d-lg-flex align-items-center">
+                                <i class="bi bi-truck fa-3x me-lg-4 mb-3 mb-lg-0"></i>
+                                <div>
+                                    <p class="fw-bold mb-0">Изпратено</p>
+                                </div>
+                            </div>
+                            <div class="d-lg-flex align-items-center">
+                                <i class="bi bi-check-circle fa-3x me-lg-4 mb-3 mb-lg-0"></i>
+                                <div>
+                                    <p class="fw-bold mb-0">Готово</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">
+                <div class="card card-stepper text-black" style="border-radius: 16px;">
+                    <div class="card-body p-2 p-lg-5">
+                        <div class="d-flex justify-content-between align-items-center mb-5">
+                            <h1>Нямате активни поръчки</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endfor %}
+</section>
+{% endblock %}

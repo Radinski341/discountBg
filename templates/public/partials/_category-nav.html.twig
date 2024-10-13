@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand navbar-dark bg-AI responsive-nav ps-xl-5 ps-md-4 ps-sm-2" aria-label="Second navbar example" style="height: 42px; opacity: 99%; z-index: 2">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarsExample02">
+            <ul class="navbar-nav me-auto responsive-nav-visible-items" {{ stimulus_controller('') }}>
+                {% for mainCategory in global.mainCategories %}
+                    <li class="nav-item dropdown responsive-nav-item activate-dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="responsiveDropdown"  aria-expanded="false">
+                            {{ mainCategory.title }}
+                        </a>
+                        <ul class="dropdown-menu bg-white border-0 m-0" aria-labelledby="responsiveDropdown" data-bs-popper="static">
+                            {% for category in mainCategory.categories %}
+                                <li><a class="dropdown-item nav-link text-black" href="{{ path('app_public_category_products', {'categorySlug': category.slug})}}">{{ category.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+
+                <li class="nav-item dropdown rest-of-links d-none">
+                    <a class="nav-link dropdown-toggle" href="#" id="responsiveDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-distribute-vertical"></i>
+                    </a>
+                    <ul class="dropdown-menu bg-dark border-0 responsive-nav-toggle-items" aria-labelledby="responsiveDropdown">
+
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="mobile-category-nav mx-0">
+                <div class="search-container px-0" {{ stimulus_controller('search', {
+                    url: path('app_api_search_preview')
+                }) }} >
+                    <form class="input-group" action="{{ path('app_public_all_products') }}" method="GET">
+                        <input
+                                type="text"
+                                name="q"
+                                class="form-control"
+                                placeholder="Търси продукт"
+                                aria-label="Search"
+                                aria-describedby="searchButton"
+                                value="{{ global.getSearchQuery }}"
+                                {{ stimulus_action('search', 'onInputChange') }}
+                                data-search-target="searchInput"
+                        >
+
+                        <button class="btn btn-outline-light" type="submit" id="searchButton">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                    <ul class="list-group-horizontal position-absolute bg-white z-3 w-100 list-unstyled rounded-3 px-1 mt-5" data-search-target="searchPreviewProducts" >
+
+                    </ul>
+                </div>
+
+        </div>
+    </div>
+</nav>

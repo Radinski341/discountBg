@@ -1,0 +1,98 @@
+{% extends 'public/profile-base.html.twig' %}
+
+{% block profile_content %}
+    {{ form_start(personalInfoForm) }}
+    <div class="form-container" id="change-info-form">
+        <div class="form-column" >
+            <h1>Промени лична информация</h1>
+            {# Display global form errors #}
+            {% if personalInfoForm.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in personalInfoForm.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {# Display field-specific errors #}
+            <div class="form-row">
+                {{ form_label(personalInfoForm.email) }}
+                {{ form_widget(personalInfoForm.email) }}
+                {% if personalInfoForm.email.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.email.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form_label(personalInfoForm.fullName) }}
+                {{ form_widget(personalInfoForm.fullName) }}
+                {% if personalInfoForm.fullName.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.fullName.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form_label(personalInfoForm.city) }}
+                {{ form_widget(personalInfoForm.city) }}
+                {% if personalInfoForm.city.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.city.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form_label(personalInfoForm.populatedPlace) }}
+                {{ form_widget(personalInfoForm.populatedPlace) }}
+                {% if personalInfoForm.populatedPlace.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.populatedPlace.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form_label(personalInfoForm.phoneNumber) }}
+                {{ form_widget(personalInfoForm.phoneNumber) }}
+                {% if personalInfoForm.phoneNumber.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.phoneNumber.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                {{ form_label(personalInfoForm.address) }}
+                {{ form_widget(personalInfoForm.address) }}
+                {% if personalInfoForm.address.vars.errors|length > 0 %}
+                    <div class="error-message">
+                        {% for error in personalInfoForm.address.vars.errors %}
+                            <p>{{ error.message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="submit-btn">
+                <button>Запази</button>
+            </div>
+
+        </div>
+    </div>
+    {{ form_end(personalInfoForm) }}
+{% endblock %}

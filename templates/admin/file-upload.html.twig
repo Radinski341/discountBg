@@ -1,0 +1,57 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% block head_stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+    <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
+{% endblock %}
+
+{% block head_javascript %}
+    {{ encore_entry_script_tags('app') }}
+    <script src="{{ asset('app.js', ea.assets.defaultAssetPackageName) }}"></script>
+{% endblock head_javascript %}
+{% block content_title %}
+    <h1>Title</h1>
+{% endblock %}
+
+{% block main %}
+    <div class="container">
+        {% for flash in app.flashes('success') %}
+            <div class="alert alert-success">{{ flash }}</div>
+        {% endfor %}
+        {% for website, form in forms %}
+            <h2>Upload files for {{ website }}</h2>
+            {{ form_start(form) }}
+                {{ form_row(form.file) }}
+                {{ form_row(form.upload) }}
+            {{ form_end(form) }}
+
+
+            <ul class="list-group" {{ stimulus_controller('file') }}>
+                {% for file in files[website] %}
+                    <li class="list-group-item">
+                        {{ file }}
+                        <button
+                            class="float-end fa fa-close"
+                            data-action="click->file#delete"
+                            data-url="{{ path('app_admin_file_delete', {'name': file, 'website': website}) }}"
+                        ></button>
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+            <div {{ stimulus_controller('data-process') }}>
+                <button
+                        class="btn btn-success mt-3"
+                        data-action="click->data-process#process"
+                        data-url="{{ path('app_admin_data_process') }}"
+                        data-message="Products for {{ website }} successfully updated!"
+                        data-data-process-target="dataProcess"
+                        data-website="{{ website }}"
+                >
+                    Process {{ website }}
+                </button>
+            </div>
+            <hr><hr><hr>
+        {% endfor %}
+    </div>
+
+{% endblock %}

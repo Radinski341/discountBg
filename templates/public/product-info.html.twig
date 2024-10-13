@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <section class="py-5">
+        <div class="container">
+            {% if(not product) %}
+                <h1>Product not found</h1>
+            {% else %}
+            <div class="row gx-5">
+                <aside {{ stimulus_controller('gallery') }}class="col-lg-6" >
+                    <div class="border rounded-4 mb-3 d-flex justify-content-center">
+                        <img {{ stimulus_target('gallery', 'mainImage')}} style="max-width: 100%; max-height: 100vh; margin: auto;" class="rounded-4 fit" src="{{ images|length > 0 ? images[1] : '' }}" />
+                    </div>
+                    <div class="d-flex justify-content-center mb-3 overflow-hidden">
+                        <i class="bi-arrow-left fs-1 arrow-prev-image" {{ stimulus_action('gallery', 'prevImage', 'click') }} style="cursor:pointer;"></i>
+                        {% for image in images %}
+                        <a class="border mx-1 rounded-2 item-thumb d-none"  data-type="image" style="cursor: pointer">
+                            <img {{ stimulus_target('gallery', 'galleryImage')}} width="60" height="60" class="rounded-2" src="{{ image }}" />
+                        </a>
+                        {% endfor %}
+                        <i class="bi-arrow-right fs-1 arrow-next-image" {{ stimulus_action('gallery', 'nextImage', 'click') }} style="cursor:pointer;"></i>
+                    </div>
+                </aside>
+                <main class="col-lg-6">
+                    <div class="ps-lg-3">
+                        <h4 class="title text-dark">
+                            {{ product.title }}
+                        </h4>
+                        <div class="d-flex justify-content-between">
+                            <div class="col-3">
+                                <div class="mb-0 text-decoration-line-through text-secondary">
+                                    <span class="h6">{{ product.oldPrice }} лв.</span>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="h5 text-danger">{{ product.newPrice }} лв.</span>
+                                </div>
+                            </div>
+                            <div class="">
+                                &nbsp;
+                                <h5>Доставка: {{ product.deliveryPrice }} лв.</h5>
+                            </div>
+                        </div>
+
+
+                        <hr />
+                        <div {{ stimulus_controller('product-info', {
+                            'allQueries': allQueries
+                        }) }}>
+                        {{ form_start(form) }}
+                            <div class="row mb-4">
+                                <!-- col.// -->
+                                <div class="col-md-4 col-6 mb-3">
+
+                                    {{ form_label(form.quantity) }}
+                                    <div {{ stimulus_controller('product-quantity')}} class="input-group mb-3" style="width: 170px;">
+                                        <button class="btn btn-white border border-secondary px-3" type="button" {{ stimulus_action('product-quantity', 'decreaseQuantity', 'click') }}>
+                                            <i class="bi-dash"></i>
+                                        </button>
+                                        {{ form_widget(form.quantity, {
+                                            'attr': {
+                                                'data-product-info-target': 'quantity'
+                                            }
+                                        }) }}
+                                        <button class="btn btn-white border border-secondary px-3" type="button" {{ stimulus_action('product-quantity', 'increaseQuantity', 'click') }}>
+                                            <i class="bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-6" >
+                                    {% if formChoicesExist %}
+                                        {{ form_label(form.choices) }}
+                                        {{ form_widget(form.choices, {
+                                            'attr': {
+                                                'data-product-info-target': 'choice'
+                                            }
+                                        }) }}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        <button
+                                type="button"
+                                name="add-to-cart"
+                                class="btn bg-AI text-white shadow-0 bi-cart-plus-fill"
+                                {{ stimulus_action('product-info', 'addToCart', 'click')}}
+                                data-url="{{ path('app_api_add_to_cart') }}"
+                        > Добави в количка </button>
+                        <button
+                                type="button"
+                                name="add-to-favourites"
+                                class="btn {{ product.isFavourite ?  'btn-danger' : 'btn-outline-danger'}} icon-hover bi-heart-fill"
+                                {{ stimulus_action('product-info', 'addToFavourite', 'click') }}
+                                data-url="{{ path('app_api_add_to_favourite') }}"
+                                data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}"
+                        > {{ product.isFavourite ? 'Изтрий од любими' : 'Добави в люубими'}} </button>
+                        {{ form_end(form) }}
+                        </div>
+                        <hr/>
+                        <div class="mt-5">
+                            <h4>Характеристики:</h4>
+                            {{ product.description | raw }}
+                        </div>
+                    </div>
+                </main>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container">
+        {% for flash in app.flashes('error') %}
+            <div class="alert alert-danger">{{ flash }}</div>
+        {% endfor %}
+
+        {{ form_start(form, {'attr' : {'novalidate' : true}}) }}
+            <div class="form-container" id="register-form">
+                <div class="form-column">
+                    <h2>Лична информация</h2>
+                    <div class="form-row">
+                        {{ form_label(form.email) }}
+                        {{ form_widget(form.email) }}
+                        <div class="error-message">
+                            {% for error in form.email.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.fullName) }}
+                        {{ form_widget(form.fullName) }}
+                        <div class="error-message">
+                            {% for error in form.fullName.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.plainPassword) }}
+                        {{ form_widget(form.plainPassword) }}
+                        <div class="error-message">
+                            {% for error in form.plainPassword.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.repeatPassword) }}
+                        {{ form_widget(form.repeatPassword) }}
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <h2>Информация за доставка</h2>
+                    <div class="form-row">
+                        {{ form_label(form.city) }}
+                        {{ form_widget(form.city) }}
+                        <div class="error-message">
+                            {% for error in form.city.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.populatedPlace) }}
+                        {{ form_widget(form.populatedPlace) }}
+                        <div class="error-message">
+                            {% for error in form.populatedPlace.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.phoneNumber) }}
+                        {{ form_widget(form.phoneNumber) }}
+                        <div class="error-message">
+                            {% for error in form.phoneNumber.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        {{ form_label(form.address) }}
+                        {{ form_widget(form.address) }}
+                        <div class="error-message">
+                            {% for error in form.address.vars.errors %}
+                                <p>{{ error.message }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="submit-btn">
+                    {{ form_widget(form.submit) }}
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+
+{% endblock %}

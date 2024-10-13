@@ -1,0 +1,44 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% block head_stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+    <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
+{% endblock %}
+
+{% block head_javascript %}
+    {{ encore_entry_script_tags('app') }}
+    <script src="{{ asset('app.js', ea.assets.defaultAssetPackageName) }}"></script>
+{% endblock head_javascript %}
+{% block content_title %}
+    <h4>{{ title }}</h4>
+{% endblock %}
+
+{% block main %}
+
+    <table class="table table-dark table-striped">
+        <thead>
+        <td>#</td>
+        <td>Order by</td>
+        <td>Status</td>
+        <td>Total price</td>
+        <td>Taken by</td>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            {% set url =  ea_url().setRoute('app_admin_order_info').set('orderId', order.id)%}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.user.email }}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.totalPrice }} лв</td>
+                {% if order.takenBy %}
+                    <td>{{ order.takenBy.email }}</td>
+                {% else %}
+                    <td>None</td>
+                {% endif %}
+                <td><a href="{{ url }}">Show</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

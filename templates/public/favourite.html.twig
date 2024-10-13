@@ -1,0 +1,75 @@
+{% extends 'public/profile-base.html.twig' %}
+
+{% block profile_content %}
+
+    <div class="container">
+        {% for product in products %}
+        <div class="row justify-content-center mb-3" {{ stimulus_controller('product-info', {slug: product.slug}) }} id="favourite-order-id-{{ product['order-id'] }}">
+            <div class="col-md-12 col-xl-10">
+                <div class="card shadow-0 border rounded-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 col-lg-3 col-xl-3 mb-4 mb-lg-0">
+                                <div class="bg-image hover-zoom ripple rounded ripple-surface">
+                                    <a href="{{ path('app_public_product_info', product['queryParams']) }}" target="_blank"><img src="{{ product['image'] }}" class="w-100" /></a>
+                                    <a href="#!">
+                                        <div class="hover-overlay">
+                                            <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-6 col-xl-6">
+                                <a href="{{ path('app_public_product_info', product['queryParams']) }}" class="text-decoration-none text-black" target="_blank">
+                                    <h5>{{ product['title'] }}</h5>
+                                </a>
+                            </div>
+                            <div class="col-md-6 col-lg-3 col-xl-3 border-sm-start-none border-start">
+                                <div class="d-flex flex-row align-items-center mb-1">
+                                    <h4 class="mb-1 me-1">{{ product['newPrice'] }}лв</h4>
+                                    <span class="text-danger"><s>{{ product['oldPrice'] }}лв</s></span>
+                                </div>
+                                <div class="d-flex flex-column mt-4" >
+                                    <button
+                                            type="button"
+                                            name="add-to-cart"
+                                            class="btn btn-success shadow-0 bi-cart-plus-fill"
+                                            {{ stimulus_action('product-info', 'addToCartFromList', 'click')}}
+                                            data-url="{{ path('app_api_add_to_cart', product['queryParams']) }}"
+                                    > Добави в количка </button>
+                                    <button
+                                            class="btn btn-danger btn-sm mt-2"
+                                            type="button"
+                                            {{ stimulus_action('product-info', 'removeFromFavourite', 'click')}}
+                                            data-order-id="{{ product['order-id'] }}"
+                                            data-product-id="{{ product['id'] }}"
+                                            data-product-choice-id="{{ product['product-choice-id'] }}"
+                                            data-url="{{ path('app_api_remove_from_favourite') }}"
+                                    >Истрий од любими</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="container py-5 h-100">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-12">
+                        <div class="card card-stepper text-black" style="border-radius: 16px;">
+                            <div class="card-body p-2 p-lg-5">
+                                <div class="d-flex justify-content-between align-items-center mb-5">
+                                    <h1>Нямате запазени продукти</h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}

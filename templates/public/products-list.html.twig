@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="products-list-container" >
+        <div {{ stimulus_controller('actions-mobile') }}>
+            <span id="open-actions-container" data-actions-mobile-target="open"><i class="bi bi-chevron-compact-right"></i> </span>
+            <div class="actions-container" data-actions-mobile-target="container">
+                <span id="close-actions-container" data-actions-mobile-target="close"><i class="bi bi-chevron-compact-left"></i></span>
+                <div class="filter-container bg-soft-blue text-dark">
+                    {{ form_start(filterForm, {
+                        'attr': {
+                            'class': 'd-flex flex-wrap align-items-start justify-content-start  align-content-start filter-form bg-transparent'
+                        }
+                    }) }}
+
+                    {{ form_label(filterForm.productsPerPage, null, {
+                        'label_attr': {
+                            'class': 'col-8'
+                        }
+                    }) }}
+                    {{ form_widget(filterForm.productsPerPage, {'attr': {
+                        'class': 'col-4 px-1'
+                    }
+                    }) }}
+
+                    {{ form_label(filterForm.order, null, {
+                        'label_attr': {
+                            'class': 'col-8'
+                        }
+                    }) }}
+                    {{ form_widget(filterForm.order, {'attr': {
+                        'class': 'col-4 px-1'
+                    }
+                    }) }}
+                    {{ form_label(filterForm.priceRangeFrom, null, {'label_attr': {'class': 'col-12'}}) }}
+                    <div class="slider-container" data-controller="slider">
+                        <div class="range-background">
+                            <div class="range-highlight" data-slider-target="highlight"></div>
+                        </div>
+                        <input type="range" id="slider1" class="slider slider1" min="0" max="{{ maxPrice }}" data-action="input->slider#updateSlider1" data-slider-target="slider1">
+                        <input type="range" id="slider2" class="slider slider2" min="0" max="{{ maxPrice }}" data-action="input->slider#updateSlider2" data-slider-target="slider2">
+                        {{ form_widget(filterForm.priceRangeFrom, {'attr': {'data-slider-target': 'hiddenSlider1', 'max': maxPrice}}) }}
+                        {{ form_widget(filterForm.priceRangeTo, {'attr': {'data-slider-target': 'hiddenSlider2', 'max': maxPrice}})}}
+
+                        <div class="values">
+                            <span id="value1" data-slider-target="value1">0 Лв</span>
+                            <span id="value2" data-slider-target="value2">{{ maxPrice}} Лв</span>
+                        </div>
+                    </div>
+                    {{ form_row(filterForm.submit) }}
+                    <a class="btn btn-danger ms-3" href="{{ urlToController }}">Исчисти</a>
+                    {{ form_end(filterForm) }}
+                </div>
+
+                <div class="bg-soft-blue text-dark mobile-nav-links">
+                    <a href="{{ path('app_homepage') }}">
+                        <span>Начало</span>
+                        <i class="bi bi-house-fill"></i>
+                    </a>
+                    <hr/>
+                    <a href="{{ path('app_homepage') }}">
+                        <span>Контакт</span>
+                        <i class="bi bi-phone-fill"></i>
+                    </a>
+                    <hr/>
+                    <a href="{{ path('app_homepage') }}">
+                        <span>Профил</span>
+                        <i class="bi bi-person-fill"></i>
+                    </a>
+                    <hr/>
+                    <a href="{{ path('app_homepage') }}">
+                        <span>Количка</span>
+                        <i class="bi bi-cart-fill"></i>
+                    </a>
+                    <hr/>
+                    <a href="{{ path('app_homepage') }}">
+                        <span>Поръчки</span>
+                        <i class="bi bi-list-ul"></i>
+                    </a>
+                </div>
+
+                <div class="map-container bg-soft-blue">
+                    {% if mainCategory is same as 'all' %}
+                        <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                            {% for mainCategory in global.mainCategories %}
+                                <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                                    <a
+                                        class="map-link text-dark"
+                                        href="{{ path('app_public_main_category_products', {'mainCategorySlug': mainCategory.slug}) }}">
+                                        {{ mainCategory.title }}
+                                    </a>
+                                    <span class="arrow ml-auto" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                                </li>
+                                <ul class="list-group smooth-collapse" data-dropdown-target="subcategories">
+                                    {% for category in mainCategory.categories %}
+                                        <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                            <a
+                                                class="map-link text-dark"
+                                                href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                                {{ category.title }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <hr class="my-1"/>
+                            {%endfor %}
+                            {% for category in global.categoriesWithoutMainCategory %}
+                                <li class="list-group-item p-0 border-0 bg-transparent text-dark">
+                                    <a
+                                        class="map-link text-dark"
+                                        href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                        {{ category.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                    {% elseif mainCategory %}
+                        <h5 class="mb-3"><a href="{{ path('app_public_all_products') }}" class="text-body"><i class="bi bi-arrow-left me-2"></i></a>{{ mainCategory.title }}</h5>
+                        <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                            {% for category in mainCategory.getCategories %}
+                                <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                                    <a
+                                        class="map-link text-dark  {% if(currCategory) %} {{ currCategory == category ? 'active-link' : '' }} {% endif %}"
+                                        href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                        {{ category.title }}
+                                    </a>
+                                    <span class="arrow ml-auto {% if(currCategory) %} {{ currCategory == category ? 'rotated' : '' }}{% endif %}" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                                </li>
+                                <ul class="list-group smooth-collapse {% if(currCategory) %} {{ currCategory == category ? 'expanded' : '' }}{% endif %}" data-dropdown-target="subcategories">
+                                    {% for subCategory in category.getSubCategories %}
+                                        <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                            <a
+                                                class="map-link text-dark  {% if(currSubCategory) %} {{ currSubCategory == subCategory ? 'active-link' : '' }} {% endif %}"
+                                                href="{{ path('app_public_sub_category_products', {'categorySlug': category.slug, 'subCategorySlug': subCategory.slug}) }}">
+                                                {{ subCategory.title }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <hr class="my-1"/>
+                            {%endfor %}
+                        </ul>
+                    {% else %}
+                        <h5 class="mb-3"><a href="{{ path('app_public_all_products') }}" class="text-body"><i class="bi bi-arrow-left me-2"></i></a></h5>
+                        <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                            {% for category in global.categoriesWithoutMainCategory %}
+                                <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                                    <a
+                                        class="map-link text-dark  {% if(currCategory) %} {{ currCategory == category ? 'active-link' : '' }} {% endif %}"
+                                        href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                        {{ category.title }}
+                                    </a>
+                                    <span class="arrow ml-auto {% if(currCategory) %} {{ currCategory == category ? 'rotated' : '' }}{% endif %}" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                                </li>
+                                <ul class="list-group smooth-collapse {% if(currCategory) %} {{ currCategory == category ? 'expanded' : '' }}{% endif %}" data-dropdown-target="subcategories">
+                                    {% for subCategory in category.getSubCategories %}
+                                        <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                            <a
+                                                    class="map-link text-dark  {% if(currSubCategory) %} {{ currSubCategory == subCategory ? 'active-link' : '' }} {% endif %}"
+                                                    href="{{ path('app_public_sub_category_products', {'categorySlug': category.slug, 'subCategorySlug': subCategory.slug}) }}">
+                                                {{ subCategory.title }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <hr class="my-1"/>
+                            {%endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="products-container">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="position-relative">
+                        <a href="{{ path('app_public_product_info', {'productSlug': product.slug}) }}">
+                            <img src="{{ product.imagesList| length >= 2 ? product.imagesList[1] : 'https://st4.depositphotos.com/14953852/24787/v/450/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg' }}" class="card-img-top" alt="Product Image">
+                        </a>
+
+                        <div class="box">
+                            <div class="ribbon left lobster-regular" style="color: #fff;">&#8681;<strong>&ndash;{{ product.discountPercent }}%</strong>&#8681;</div>
+                        </div>
+                    </div>
+
+                    <div class="product-card-body">
+                        <a href="{{ path('app_public_product_info', {'productSlug': product.slug}) }}">
+                            <h6 class="card-title mb-3">{{ product.title| length >= 60 ? product.title | u.truncate(60)~'...' : product.title }}</h6>
+                        </a>
+                        <div class="price-and-actions">
+                            <p class="text-decoration-line-through text-secondary mb-0">{{ product.oldPrice}} лв.</p>
+                            <h4 class="product-new-price lobster-regular"><strong>{{ product.newPrice}} лв.</strong></h4>
+                            <div class="bottom-icons float-end justify-content-end" {{ stimulus_controller('product-info', {'slug': product.slug}) }}>
+                                <button
+                                        class="badge text-danger p-1 border-0 bg-white bi action-button {{ product.isFavourite ? 'bi-heart-fill' : 'bi-heart' }}"
+                                        {{ stimulus_action('product-info', 'addToFavouriteFromList', 'click')}}
+                                        data-url="{{ path('app_api_add_to_favourite', {'productSlug': product.slug}) }}"
+                                        data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}"
+                                        style="font-size: 25px;"
+                                >
+
+                                </button>
+                                <button
+                                        class="badge text-success p-0 ms-2 border-0 bg-white action-button"
+                                        {{ stimulus_action('product-info', 'addToCartFromList', 'click')}}
+                                        data-url="{{ path('app_api_add_to_cart', {'productSlug': product.slug}) }}"
+                                        data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}"
+                                >
+                                    <i class="bi bi-cart-plus-fill" style="font-size: 28px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="pagination-extend">
+            {{ pagerfanta(products) }}
+        </div>
+
+    </div>
+
+{% endblock %}

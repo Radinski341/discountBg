@@ -1,0 +1,63 @@
+{% extends 'public/profile-base.html.twig' %}
+
+{% block profile_content %}
+<div class="profile-homepage-container">
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-success">{{ flash }}</div>
+    {% endfor %}
+    <div class="profile-info">
+        <h3>Данни на акаунта</h3>
+
+        <div class="user-info">
+            <div class="info-image">
+                <img src="{{ avatar }}" alt="test"/>
+            </div>
+
+            <div class="info-content">
+                <div class="info-row">
+                    <p class="info-key">Име:</p>
+                    <p class="info-value">{{ user.fullName }}</p>
+                </div>
+                <div class="info-row">
+                    <p class="info-key">Имейл:</p>
+                    <p class="info-value">{{ user.email }}</p>
+                </div>
+                <div class="info-row">
+                    <p class="info-key">Телефонен номер:</p>
+                    <p class="info-value">{{ user.phoneNumber }}</p>
+                </div>
+                <div class="info-row">
+                    <p class="info-key">Адрес:</p>
+                    <p class="info-value">{{ user.address }}, {{ user.city }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="block-button">
+            <a href="{{ path('app_change_info') }}">Управлявай твоите данни</a>
+        </div>
+    </div>
+
+    <div class="orders-and-favourites">
+        <div class="oaf-block">
+            <div class="oaf-content">
+                <i class="bi bi-list-ul orders"></i>
+                <p>{{ activeOrders | length }} активни поръчки</p>
+            </div>
+            <div class="block-button">
+                <a href="{{ path('app_public_pending_orders') }}">Виж активни поръчки</a>
+            </div>
+        </div>
+
+        <div class="oaf-block">
+            <div class="oaf-content">
+                <i class="bi bi-heart-fill favourites"></i>
+                <p>{{ favouritesCount }} запазени продукти</p>
+            </div>
+            <div class="block-button">
+                <a href="{{ path('app_public_favourite') }}">Виж запазени продукти</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

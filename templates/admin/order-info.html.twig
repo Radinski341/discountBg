@@ -1,0 +1,170 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% block head_stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+    <link rel="stylesheet" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
+{% endblock %}
+
+{% block head_javascript %}
+    {{ encore_entry_script_tags('app') }}
+    <script src="{{ asset('app.js', ea.assets.defaultAssetPackageName) }}"></script>
+{% endblock head_javascript %}
+{% block content_title %}
+    <h4>Order ID: {{ order.id }} - {{ order.takenBy ? 'Taken by '~order.takenBy.email : 'Waiting to be processed' }}</h4>
+{% endblock %}
+
+{% block main %}
+    <div class="bg-dark p-3 border-secondary mb-2" {{ stimulus_controller('order', {
+        changeStatusUrl: path('app_api_change_order_status'),
+        getStatusUrl: path('app_api_get_order_status'),
+        orderId: order.id
+    }) }}>
+        <h5>Order status</h5>
+        {% for button in statusButtons %}
+            <button
+                    {{ stimulus_action('order', 'changeOrderStatus', 'click') }}
+                    class="btn ms-1 {{ button['type'] }}"
+                    data-status-type="{{ button['value'] }}"
+            >{{ button['text'] }}</button>
+        {% endfor %}
+        <h6 class="float-end">
+            <i class="fa fa-info-circle"></i>
+            Status:
+            <span data-order-target="status">{{ order.status }}</span> -
+            <span class="text-secondary" data-order-target="statusDescription">{{ order.statusDescription }}</span>
+        </h6>
+    </div>
+
+    <div class="card mb-3">
+        <h5 class="p-3">User info</h5>
+        <hr>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Full Name</h6>
+                </div>
+                <div class="col-sm-9 text-white">
+                    Kenneth Valdez
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Email</h6>
+                </div>
+                <div class="col-sm-9 text-white">
+                    fip@jukmuh.al
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Phone</h6>
+                </div>
+                <div class="col-sm-9 text-white">
+                    (239) 816-9029
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Mobile</h6>
+                </div>
+                <div class="col-sm-9 text-white">
+                    (320) 380-4539
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">Address</h6>
+                </div>
+                <div class="col-sm-9 text-white">
+                    Bay Area, San Francisco, CA
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr >
+                <td class="text-white">#</td>
+                <td class="text-white">Image</td>
+                <td class="text-white">Product</td>
+                <td class="text-white">URL</td>
+                <td class="text-white">Quantity</td>
+                <td class="text-white">Price</td>
+                <td class="text-white">Total Price</td>
+                <td class="text-white">Status</td>
+                <td class="text-white"></td>
+            </tr>
+        </thead>
+        <tbody {{ stimulus_controller('order-info', {
+            statusChoiceColors: statusChoiceColors,
+            changeStatusUrl: path('app_api_change_order_transaction_status'),
+            getStatusDescriptionUrl: path('app_api_get_status_description')
+        }) }}>
+        {% for transaction in orderTransactions %}
+            <tr>
+                <td>{{ transaction.id }}</td>
+                <td>
+                    <a href="{{ transaction.productImage }}" target="_blank">
+                        <img src="{{ transaction.productImage }}" width="50px" height="50px">
+                    </a>
+                </td>
+
+                <td>
+                    {% if transaction.productChoice %}
+                        {% set productUrl = ea_url().setAction('detail').setController('App\\Controller\\Admin\\ProductChoiceCrudController').setEntityId(transaction.productChoice.id) %}
+                        <a href="{{ productUrl }}" target="_blank">{{ transaction.productChoice.title | length >= 60 ? transaction.productChoice.title | u.truncate(60)~'...' : transaction.productChoice.title}}</a>
+                    {% elseif transaction.product%}
+                        {% set productUrl = ea_url().setAction('detail').setController('App\\Controller\\Admin\\ProductCrudController').setEntityId(transaction.product.id) %}
+                        <a href="{{ productUrl }}" target="_blank">{{ transaction.product.title | length >= 60 ? transaction.product.title | u.truncate(60)~'...' : transaction.product.title}}</a>
+                    {% else %}
+                        Product not available any more
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="{{ transaction.originalWebsiteUrl }}" target="_blank">
+                        {{ transaction.originalWebsiteUrl | length >= 60 ? transaction.originalWebsiteUrl | u.truncate(60)~'...' : transaction.originalWebsiteUrl}}
+                    </a>
+                </td>
+
+                <td>{{ transaction.quantity }}</td>
+                <td>{{ transaction.price }}</td>
+                <td>{{ transaction.price * transaction.quantity}}</td>
+
+                <td>
+                    {% if allowActions or is_granted('ROLE_OWNER') %}
+                    <select
+                            class="order-transaction-choice text-black"
+                            data-transaction-id="{{ transaction.id }}"
+                            data-transaction-status="{{ transaction.status }}"
+                            {{ stimulus_action('order-info', 'changeStatusValue', 'change') }}
+                    >
+                        {% for choice in statusChoices %}
+                            <option value="{{ choice }}" {{ transaction.status == choice ? 'selected' : '' }}>{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                        <p class="text-danger">Actions not allowed! </p>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <button
+                            type="button"
+                            class="bi bi-info-circle-fill"
+                            style="background-color: transparent;
+                            border: none;
+                            font-size: 20px"
+                            {{ stimulus_action('order-info', 'getStatusDescription', 'click') }}
+                            data-transaction-id="{{ transaction.id }}"
+                    ></button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

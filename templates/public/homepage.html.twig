@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {{ include('public/partials/_mobile-nav.html.twig') }}
+
+    <section class="hero">
+        <div class="hero-message">
+            <h1>Всички намалени продукти<br/> на едно място!</h1>
+            <h2>Открийте най-добрите намаления в България!</h2>
+            <p>Добре дошли в DiscountBG, вашето място за невероятни оферти! Ние сътрудничим с водещи онлайн магазини, за да ви предложим най-добрите намаления на пазара. От електроника до мода, открийте всичко, от което се нуждаете, на изключителни цени. Пазарувайте умно, пазарувайте с отстъпка!</p>
+            <a class="bg-AI" href="{{ path('app_public_all_products') }}">Всички намалениа ➜</a>
+        </div>
+        <div class="hero-trust">
+            <div class="hero-badges bg-AI">
+                <div class="badge-container">
+                    <div class="badge-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="badge-content">
+                        <p>Най-ниска цена</p>
+                        <span>100% </span>
+                    </div>
+                </div>
+                <div class="badge-container">
+                    <div class="badge-icon">
+                        <i class="bi bi-tags-fill"></i>
+                    </div>
+                    <div class="badge-content">
+                        <p>Намалени продукти</p>
+                        <span>10М+ </span>
+                    </div>
+                </div>
+                <div class="badge-container">
+                    <div class="badge-icon">
+                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                    </div>
+                    <div class="badge-content">
+                        <p>Соработка с магазини</p>
+                        <span>20+ </span>
+                    </div>
+                </div>
+                <div class="badge-container">
+                    <div class="badge-icon">
+                        <i class="bi bi-lightning-fill"></i>
+                    </div>
+                    <div class="badge-content">
+                        <p>Отстпки до</p>
+                        <span>80% </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-advantages">
+                <div class="advantage-container">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <h4>Бърза доставка</h4>
+                </div>
+                <div class="advantage-container">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <h4>Сигурно и лесно пазаруване</h4>
+                </div>
+                <div class="advantage-container">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <h4>Нови продукти всеки ден</h4>
+                </div>
+                <div class="advantage-container">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <h4>Безплатна доставка над 100 лв.</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="carousel-container">
+        <h2 class="categories-carousel-title mb-4">Открийте най-добрите оферти за вас!</h2>
+        <h3 class="categories-carousel-subtitle">Не пропускайте специалните предложения в нашите топ категории – пазарувайте сега и спестете повече!</h3>
+        <div data-controller="carousel" class="carousel" data-translation="0">
+            <div class="carousel-inner" data-carousel-target="carousel">
+                {% for category in global.mainCategories %}
+                    <div class="carousel-item category-carousel-item" data-carousel-target="slide">
+                        <a class="category-container"  href="{{ path('app_public_main_category_products', {'mainCategorySlug': category.slug}) }}">
+                            <img src="/uploads/images/{{ category.img }}" alt="{{ category.title }}"/>
+                            <h3 class="">{{ category.title }}</h3>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" data-carousel-target="prevButton" data-action="click->carousel#previous">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </button>
+            <button class="carousel-control-next" data-carousel-target="nextButton" data-action="click->carousel#next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </button>
+        </div>
+    </div>
+
+    {% for carousel in carousels %}
+        <div class="carousel-container">
+            <h2 class="carousel-title mb-4 mt-5">{{ carousel.title }}</h2>
+            <div data-controller="carousel" class="carousel" data-translation="0">
+                <div class="carousel-inner" data-carousel-target="carousel">
+                    {% for product in carousel.products %}
+                        <div class="carousel-item" data-carousel-target="slide">
+                            <div class="justify-content-center align-items-center d-flex mb-4">
+                                <div class="product-card">
+                                    <div class="card border-0">
+                                        <div class="position-relative">
+                                            <a href="{{ path('app_public_product_info', {'productSlug': product.slug}) }}">
+                                                <img src="{{ product.imagesList| length >= 2 ? product.imagesList[1] : 'https://st4.depositphotos.com/14953852/24787/v/450/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg' }}" class="card-img-top" alt="Product Image">
+                                            </a>
+                                            <div class="box">
+                                                <div class="ribbon left" style="color: #000;">&#8681;<strong>&ndash;{{ product.discountPercent }}%</strong>&#8681;</div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <a class="nav-link" href="{{ path('app_public_product_info', {'productSlug': product.slug}) }}" style="height: 76px">
+                                                <h6 class="card-title mb-3">{{ product.title| length >= 60 ? product.title | u.truncate(60)~'...' : product.title }}</h6>
+                                            </a>
+                                            <p class="text-decoration-line-through text-secondary mb-0">{{ product.oldPrice }} лв.</p>
+                                            <h4 class="text-white float-start p-1 pb-0 pt-0" style="background-color: red"><strong>{{ product.newPrice }} лв.</strong></h4>
+                                            <div class="bottom-icons float-end justify-content-end" {{ stimulus_controller('product-info', {'slug': product.slug}) }}>
+                                                <button
+                                                        class="badge text-danger p-1 border-0 bg-white bi {{ product.isFavourite ? 'bi-heart-fill' : 'bi-heart' }}"
+                                                        {{ stimulus_action('product-info', 'addToFavouriteFromList', 'click')}}
+                                                        data-url="{{ path('app_api_add_to_favourite', {'productSlug': product.slug}) }}"
+                                                        data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}"
+                                                        style="font-size: 25px;">
+                                                </button>
+                                                <button
+                                                        class="badge text-success p-0 ms-2 border-0 bg-white"
+                                                        {{ stimulus_action('product-info', 'addToCartFromList', 'click')}}
+                                                        data-url="{{ path('app_api_add_to_cart', {'productSlug': product.slug}) }}"
+                                                        data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}">
+                                                    <i class="bi bi-cart-plus-fill" style="font-size: 28px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" data-carousel-target="prevButton" data-action="click->carousel#previous">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </button>
+                <button class="carousel-control-next" data-carousel-target="nextButton" data-action="click->carousel#next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </button>
+            </div>
+{#            <img class="carousel-image" src="{{ asset('build/images/banner.avif') }}" style="width: 100%"/>#}
+        </div>
+    {% endfor %}
+{% endblock %}

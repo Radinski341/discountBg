@@ -1,0 +1,49 @@
+.filter-form{
+    background-color: #f6f6f6;
+}
+.filter-form select{
+    height: 20px;
+    font-size: 12px;
+    padding: 0;
+    width: 33%;
+}
+
+.filter-form label{
+    font-size: 14px;
+    letter-spacing: 0;
+}
+
+/* Arrow styling */
+.arrow {
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 5px;
+    transform: rotate(45deg); /* Default state, pointing down */
+    transition: transform 0.3s ease; /* Smooth rotation */
+    cursor: pointer;
+}
+
+.arrow.rotated {
+    transform: rotate(-135deg); /* Rotated state, pointing up */
+}
+
+/* Smooth collapse */
+.smooth-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0;
+}
+
+.smooth-collapse.expanded {
+    max-height: 500px; /* Adjust according to content */
+    opacity: 1;
+}
+
+/* Flexbox for right alignment */
+.d-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

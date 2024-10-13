@@ -1,0 +1,106 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light ps-xl-5 ps-md-4 ps-sm-2 main-nav-extend text-white">
+    <div class="container-fluid">
+        <!-- Logo on the left -->
+        <a class="navbar-brand p-0" href="{{ path('app_homepage') }}">
+            <img src="{{ asset('build/images/logo.png') }}" alt="Logo" height="50" width="70px">
+        </a>
+        <nav class="navbar bg-transparent d-none d-lg-flex">
+            <div class="container">
+                <div class="navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav d-flex flex-row">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ path('app_homepage') }}">Начало</a>
+                        </li>
+                        <li class="nav-item mx-3 mx-lg-0">
+                            <a class="nav-link text-white" href="#">Контакт</a>
+                        </li>
+                    </ul>
+                    <div class="container main-nav-search-bar d-none d-lg-flex" {{ stimulus_controller('search', {
+                        url: path('app_api_search_preview')
+                    }) }}>
+                        <form class="input-group" action="{{ path('app_public_all_products') }}" method="GET">
+                            <input
+                                    type="text"
+                                    name="q"
+                                    class="form-control"
+                                    placeholder="Търси продукт"
+                                    aria-label="Search"
+                                    aria-describedby="searchButton"
+                                    value="{{ global.getSearchQuery }}"
+                                    {{ stimulus_action('search', 'onInputChange') }}
+                                    data-search-target="searchInput"
+                            >
+
+                            <button class="btn btn-outline-light" type="submit" id="searchButton">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+                        <ul class="list-group-horizontal position-absolute bg-white z-3 w-100 list-unstyled rounded-3 px-1 mt-5" data-search-target="searchPreviewProducts" >
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+
+
+        <div class="d-flex align-items-center ms-auto me-4">
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                <div class="dropdown me-2">
+                    <button class="nav-item btn-lg dropdown-toggle text-white bg-transparent border-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="{{ global.getUserAvatar }}" style="width: 40px"/>
+                    </button>
+                    <ul class="dropdown-menu z-3" aria-labelledby="userDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{{ path('app_public_profile') }}">
+                                <span class="float-end"><i class="bi bi-person-lines-fill"></i></span>
+                                Профил
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ path('app_public_pending_orders') }}">
+                                <span class="float-end"> <i class="bi bi-list-check"></i></span>
+                                Поръчки
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                <span class="float-end"> <i class="bi bi-box-arrow-left"></i></span>
+                                Изход
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% else %}
+                <a class="nav-link  m-2" href="{{ path('app_login') }}">Вход</a>
+                <a class="nav-link m-2" href="{{ path('app_register') }}">Регистрация</a>
+            {% endif %}
+            <div class="position-relative">
+                <a href="{{ path('app_public_favourite') }}" class="nav-link" style="height: 25px">
+                    <i class="bi bi-heart-fill" style="font-size: 25px"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="total-favourite-items">
+                        {% if global.getTotalFavouriteItems %}
+                            {{ global.getTotalFavouriteItems }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </span>
+                </a>
+            </div>
+            <div class="position-relative ms-3">
+                <a href="{{ path('app_public_cart') }}" class="nav-link" style="height: 25px">
+                    <i class="bi bi-cart-fill" style="font-size: 25px"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" id="total-cart-items" >
+                        {% if global.getTotalCartItems %}
+                        {{ global.getTotalCartItems }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</nav>

@@ -1,0 +1,47 @@
+.main-nav-extend{
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2)), url("../files/images/nav-bg.webp");
+    background-position: center;
+    background-size: cover;
+}
+
+.mobile-category-nav{
+    display: none;
+}
+
+@media only screen and (max-width: 992px) {
+    .mobile-category-nav{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+   .search-container{
+       width: 300px;
+   }
+    #navbarsExample02{
+        display: none !important;
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    .search-container{
+        width: 200px;
+        font-size: 12px;
+    }
+
+    .search-preview-product img{
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media only screen and (max-width: 350px) {
+    .search-container{
+        font-size: 10px;
+    }
+    .search-preview-product img{
+        width: 30px;
+        height: 30px;
+    }
+}

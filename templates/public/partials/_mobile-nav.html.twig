@@ -1,0 +1,122 @@
+<div class="actions-mobile-global" {{ stimulus_controller('actions-mobile') }}>
+    <span id="open-actions-container" data-actions-mobile-target="open"><i class="bi bi-chevron-compact-right"></i> </span>
+    <div class="actions-container" data-actions-mobile-target="container">
+        <span id="close-actions-container" data-actions-mobile-target="close"><i class="bi bi-chevron-compact-left"></i></span>
+        <div class="bg-soft-blue text-dark mobile-nav-links">
+            <a href="{{ path('app_homepage') }}">
+                <span>Начало</span>
+                <i class="bi bi-house-fill"></i>
+            </a>
+            <hr/>
+            <a href="{{ path('app_homepage') }}">
+                <span>Контакт</span>
+                <i class="bi bi-phone-fill"></i>
+            </a>
+            <hr/>
+            <a href="{{ path('app_homepage') }}">
+                <span>Профил</span>
+                <i class="bi bi-person-fill"></i>
+            </a>
+            <hr/>
+            <a href="{{ path('app_homepage') }}">
+                <span>Количка</span>
+                <i class="bi bi-cart-fill"></i>
+            </a>
+            <hr/>
+            <a href="{{ path('app_homepage') }}">
+                <span>Поръчки</span>
+                <i class="bi bi-list-ul"></i>
+            </a>
+        </div>
+        <div class="map-container bg-soft-blue">
+            {% if mainCategory is not defined %}
+                <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                    {% for mainCategory in global.mainCategories %}
+                        <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                            <a
+                                    class="map-link text-dark"
+                                    href="{{ path('app_public_main_category_products', {'mainCategorySlug': mainCategory.slug}) }}">
+                                {{ mainCategory.title }}
+                            </a>
+                            <span class="arrow ml-auto" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                        </li>
+                        <ul class="list-group smooth-collapse" data-dropdown-target="subcategories">
+                            {% for category in mainCategory.categories %}
+                                <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                    <a
+                                            class="map-link text-dark"
+                                            href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                        {{ category.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <hr class="my-1"/>
+                    {%endfor %}
+                    {% for category in global.categoriesWithoutMainCategory %}
+                        <li class="list-group-item p-0 border-0 bg-transparent text-dark">
+                            <a
+                                    class="map-link text-dark"
+                                    href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                {{ category.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% elseif mainCategory %}
+                <h5 class="mb-3"><a href="{{ path('app_public_all_products') }}" class="text-body"><i class="bi bi-arrow-left me-2"></i></a>{{ mainCategory.title }}</h5>
+                <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                    {% for category in mainCategory.getCategories %}
+                        <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                            <a
+                                    class="map-link text-dark  {% if(currCategory) %} {{ currCategory == category ? 'active-link' : '' }} {% endif %}"
+                                    href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                {{ category.title }}
+                            </a>
+                            <span class="arrow ml-auto {% if(currCategory) %} {{ currCategory == category ? 'rotated' : '' }}{% endif %}" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                        </li>
+                        <ul class="list-group smooth-collapse {% if(currCategory) %} {{ currCategory == category ? 'expanded' : '' }}{% endif %}" data-dropdown-target="subcategories">
+                            {% for subCategory in category.getSubCategories %}
+                                <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                    <a
+                                            class="map-link text-dark  {% if(currSubCategory) %} {{ currSubCategory == subCategory ? 'active-link' : '' }} {% endif %}"
+                                            href="{{ path('app_public_sub_category_products', {'categorySlug': category.slug, 'subCategorySlug': subCategory.slug}) }}">
+                                        {{ subCategory.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <hr class="my-1"/>
+                    {%endfor %}
+                </ul>
+            {% else %}
+                <h5 class="mb-3"><a href="{{ path('app_public_all_products') }}" class="text-body"><i class="bi bi-arrow-left me-2"></i></a></h5>
+                <ul class="list-group" {{ stimulus_controller('dropdown') }}>
+                    {% for category in global.categoriesWithoutMainCategory %}
+                        <li class="list-group-item p-0 border-0 bg-transparent text-dark d-flex justify-content-between align-items-center">
+                            <a
+                                    class="map-link text-dark  {% if(currCategory) %} {{ currCategory == category ? 'active-link' : '' }} {% endif %}"
+                                    href="{{ path('app_public_category_products', {'categorySlug': category.slug}) }}">
+                                {{ category.title }}
+                            </a>
+                            <span class="arrow ml-auto {% if(currCategory) %} {{ currCategory == category ? 'rotated' : '' }}{% endif %}" data-dropdown-target="arrow" data-index="{{ loop.index0 }}" data-action="click->dropdown#toggle"></span>
+                        </li>
+                        <ul class="list-group smooth-collapse {% if(currCategory) %} {{ currCategory == category ? 'expanded' : '' }}{% endif %}" data-dropdown-target="subcategories">
+                            {% for subCategory in category.getSubCategories %}
+                                <li class="p-0 mb-0 align-self-end border-0 fw-lighter bg-transparent text-dark" style="width: 90%; font-size: 13px">
+                                    <a
+                                            class="map-link text-dark  {% if(currSubCategory) %} {{ currSubCategory == subCategory ? 'active-link' : '' }} {% endif %}"
+                                            href="{{ path('app_public_sub_category_products', {'categorySlug': category.slug, 'subCategorySlug': subCategory.slug}) }}">
+                                        {{ subCategory.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <hr class="my-1"/>
+                    {%endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>

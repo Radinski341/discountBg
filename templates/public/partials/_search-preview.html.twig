@@ -1,0 +1,19 @@
+{% for product in products %}
+    <a href="{{ path('app_public_product_info', {productSlug: product.slug}) }}" class="text-decoration-none text-black">
+        <li class="search-preview-product">
+
+                <img
+                        src="{{ product.mainImage }}"
+                        width="50px"
+                        height="50px"
+                        class="d-inline"
+                >
+                <p class="d-inline">{{ product.title| length >= 50 ? product.title | u.truncate(50)~'...' : product.title }}</p>
+
+        </li>
+    </a>
+    {% else %}
+
+        <p style="padding-top: 20px; padding-left: 10px; padding-bottom: 0px">Няма намерени резултати!</p>
+
+{% endfor %}

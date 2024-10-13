@@ -1,0 +1,51 @@
+<div class="profile-nav-container" {{ stimulus_controller('profile-mobile-nav') }}>
+    <div class="profile-card bg-AI" {{ stimulus_action('profile-mobile-nav', 'toggleNav', 'click') }}>
+        <img src="{{ global.getUserAvatar }}"/>
+        <div class="user-info">
+            <h5>{{ global.getGlobalUser.fullName }}</h5>
+            <p>{{ global.getGlobalUser.email }}</p>
+        </div>
+        <i class="bi  bi-chevron-compact-down"></i>
+    </div>
+    <div class="nav-mobile-container" data-profile-mobile-nav-target="nav">
+    <div class="nav-block bg-soft-blu">
+        <h2>Активност</h2>
+        <div class="block-items">
+            <a href="{{ path('app_public_profile') }}" class="{{ currentProfilePage == 'home' ? 'active-page' : '' }}">
+                <i class="bi bi-house-fill"></i>
+                <h5>Начална</h5>
+            </a>
+            <a href="{{ path('app_public_pending_orders') }}" class="{{ currentProfilePage == 'activeOrders' ? 'active-page' : '' }}">
+                <i class="bi bi-list-ul"></i>
+                <h5>Активни поръчки</h5>
+            </a>
+            <a href="{{ path('app_public_closed_orders') }}" class="{{ currentProfilePage == 'ordersHistory' ? 'active-page' : '' }}">
+                <i class="bi bi-clock-history"></i>
+                <h5>История на поръчки</h5>
+            </a>
+            <a href="{{ path('app_public_favourite') }}" class="{{ currentProfilePage == 'favourites' ? 'active-page' : '' }}">
+                <i class="bi bi-heart-fill"></i>
+                <h5>Запазени продукти</h5>
+            </a>
+        </div>
+    </div>
+    <div class="nav-block">
+        <h2>Настройки на профила</h2>
+        <div class="block-items">
+            <a href="{{ path('app_change_info') }}" class="{{ currentProfilePage == 'personal-info' ? 'active-page' : '' }}">
+                <i class="bi bi-person-lines-fill"></i>
+                <h5>Обща информация</h5>
+            </a>
+            <a href="{{ path('app_change_password') }}" class="{{ currentProfilePage == 'change-password' ? 'active-page' : '' }}">
+                <i class="bi bi-shield-lock-fill"></i>
+                <h5>Промени парола</h5>
+            </a>
+            <a href="{{ path('app_logout') }}">
+                <i class="bi bi-power log-out-icon"></i>
+                <h5>Изход</h5>
+            </a>
+        </div>
+    </div>
+    </div>
+</div>
+
