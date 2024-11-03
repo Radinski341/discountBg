@@ -11,6 +11,7 @@ use App\Service\CartService;
 use App\Service\GlobalVariables;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -63,33 +64,35 @@ class CartEndpointController extends AbstractController
         }
 
         elseif(!$session->get('cart')) {
-            $sessionCart = new Cart();
-            $productOrder = $cartService->createProductOrder($sessionCart, $product, $choice, $quantity);
-            $sessionCart->addProductOrder($productOrder);
-            $cartService->setSessionCart($sessionCart);
+            $cart = new Cart();
+            $productOrder = $cartService->createProductOrder($cart, $product, $choice, $quantity);
+            $cart->addProductOrder($productOrder);
+            $cartService->setSessionCart($cart);
         }else{
-            $sessionCart = $cartService->getSessionCart();
+            $cart = $cartService->getSessionCart();
             $productInCart = false;
-            if(count($sessionCart->getProductOrders()) > 0){
-                foreach ($sessionCart->getProductOrders() as $productOrder){
+            if(count($cart->getProductOrders()) > 0){
+                foreach ($cart->getProductOrders() as $productOrder){
 
                     if($productOrder->getProduct()->getId() === $product->getId() && $productOrder->getProductChoice()?->getId() === $choice?->getId()){
                         $productOrder->setQuantity($productOrder->getQuantity() + $quantity);
-                        $cartService->setSessionCart($sessionCart);
+                        $cartService->setSessionCart($cart);
                         $productInCart = true;
                     }
                 }
             }
             if(!$productInCart){
-                $productOrder = $cartService->createProductOrder($sessionCart, $product, $choice, $quantity);
-                $sessionCart->addProductOrder($productOrder);
-                $cartService->setSessionCart($sessionCart);
+                $productOrder = $cartService->createProductOrder($cart, $product, $choice, $quantity);
+                $cart->addProductOrder($productOrder);
+                $cartService->setSessionCart($cart);
             }
         }
 
         $entityManager->flush();
 
-        return new Response('');
+        return $this->render('public/partials/_cart-preview.html.twig', [
+            'cart' => $cart
+        ]);
     }
 
     #[Route(path: '/api/remove-from-cart', name:'app_api_remove_from_cart', methods: 'POST')]
@@ -129,7 +132,9 @@ class CartEndpointController extends AbstractController
             'products' => $products,
             'totalQuantity' => $totalQuantity,
             'totalPrice' => $totalPrice,
-            'totalOldPrice' => $totalOldPrice
+            'totalOldPrice' => $totalOldPrice,
+            'stripe_public_key' => $this->getParameter('stripe_public_key'),
+            'stripe_secret_key' => $this->getParameter('stripe_secret_key')
         ]);
     }
 

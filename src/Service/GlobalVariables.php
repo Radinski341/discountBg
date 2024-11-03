@@ -48,6 +48,21 @@ class GlobalVariables
         return $this->mainCategoryRepository->getAllCategoriesLevels();
     }
 
+    public function getCart()
+    {
+        $user = $this->security->getUser();
+        if($user){
+            $cart = $user->getCart();
+        }else{
+            $request = $this->container->get('request_stack');
+            $session = $request->getSession();
+            $serializedCart = $session->get('cart');
+            $cart = unserialize($serializedCart);
+        }
+
+        return $cart;
+    }
+
     public function getTotalCartItems()
     {
         $user = $this->security->getUser();
@@ -61,7 +76,7 @@ class GlobalVariables
         }
 
         if(!$cart){
-            return null;
+            return 0;
         }
         $totalQuantity = 0;
         foreach ($cart->getProductOrders() as $productOrder){
@@ -83,7 +98,7 @@ class GlobalVariables
         }
 
         if(!$favourite){
-            return null;
+            return 0;
         }
 
         return count($favourite->getFavouriteOrders());

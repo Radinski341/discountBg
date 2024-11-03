@@ -1,0 +1,14 @@
+<div>
+    <button class="close-cart-preview-container" data-action="click->global-quantity#closeCartPreview"><i class="fa fa-close"></i></button>
+    <h3>Имате {{ global.cart.productOrders | length}} продукта в количката</h3>
+    <div class="cart-preview-products-container">
+        {% for order in global.cart.productOrders %}
+            <div class="cart-preview-product">
+                <img src="{{ order.product.mainImage }}" alt="{{ order.product.title }}"/>
+                <a class="preview-product-title" href="{{ path('app_public_product_info', {productSlug: order.product.slug}) }}">{{ order.product.title }}</a>
+                <p class="preview-product-quantity">{{ order.quantity }}</p>
+            </div>
+        {% endfor %}
+        <a class="bg-AI view-cart-button" href="">Виж количка</a>
+    </div>
+</div>

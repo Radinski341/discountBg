@@ -90,28 +90,6 @@ body {
     font-style: normal;
 }
 
-/*.banner-container{*/
-/*    height: 100px;*/
-/*    width: 100%;*/
-/*    position: relative;*/
-/*    background: linear-gradient(#7e0ea3, #3e0add);*/
-/*    cursor: pointer;*/
-/*    overflow: hidden;*/
-/*}*/
-
-/*.banner-list{*/
-/*    display: flex;*/
-/*    flex-direction: row;*/
-/*    white-space: nowrap;*/
-/*}*/
-
-/*.banner{*/
-/*    width: 600px;*/
-/*    height: 100%;*/
-/*    mask-image: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0));*/
-/*    margin: 0 80px;*/
-/*}*/
-
 .banner-container {
     width: 100%;
     overflow: hidden;
@@ -136,6 +114,100 @@ body {
     width: calc((100vw / var(--items-per-screen)) - (var(--items-per-screen) * var(--gap-between-items)));
     height: 120px;
 }
+
+.cart-preview-container{
+    position: fixed;
+    top: 11px;
+    right: 4px;
+    background-color: white;
+    z-index: 9999;
+    padding: 10px;
+    transition: all 0.1s;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #ccc;
+}
+
+.cart-preview-container h3{
+    font-size: 20px;
+}
+
+.cart-preview-products-container{
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-preview-product{
+    display: grid;
+    grid-template-columns: 70px 200px 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #ccc;
+    margin-bottom: 10px;
+    padding: 5px;
+    align-items: center;
+}
+
+.cart-preview-product p{
+    margin: 0;
+}
+
+.cart-preview-product img{
+    width: 60px;
+}
+
+.preview-product-title{
+    font-size: 14px;
+    margin: 0;
+    text-decoration: none;
+    color: black;
+}
+
+.preview-product-title:hover{
+    text-decoration: underline;
+}
+
+.close-cart-preview-container{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: transparent;
+    border: none;
+}
+
+.view-cart-button{
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 900;
+    border-radius: 30px;
+    padding: 2px 30px;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.view-cart-button:hover{
+    box-shadow: 0 0 10px #6431d3;
+    color: white;
+}
+
+.search-preview-extend{
+    transition: all 0.5s;
+    border-radius: 10px;
+    box-shadow: 2px 2px 5px #ccc;
+}
+
+.search-preview-product a{
+    width: 100%;
+    height: 100%;
+}
+
+.search-preview-product p{
+    font-size: 12px;
+}
+
+.search-preview-product a:hover{
+    text-decoration: underline !important;
+}
+
 @media only screen and (max-width: 1000px) {
     .main-nav-links{display: none}
 

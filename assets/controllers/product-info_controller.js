@@ -1,5 +1,4 @@
 import { Controller } from '@hotwired/stimulus';
-import {useDispatch} from "stimulus-use";
 import Swal from "sweetalert2";
 
 export default class extends Controller {
@@ -11,7 +10,7 @@ export default class extends Controller {
 
     static targets = ['quantity', 'choice']
     connect() {
-        useDispatch(this, {debug: true})
+        this.dispatch(this, {debug: true})
         let allQueriesArray = Object.keys(this.allQueriesValue).map((key) => [key, this.allQueriesValue[key]])
 
         allQueriesArray.forEach(query => {
@@ -54,7 +53,7 @@ export default class extends Controller {
                 return response.text();
             })
             .then(data => {
-                this.dispatch('quantity-change-from-info', {detail: {quantityChange: quantity}})
+                this.dispatch('quantity-change', {detail: {quantityChange: quantity}})
             }) // Log the raw response data
             .catch(error => console.error('Error:', error));
 
@@ -80,7 +79,7 @@ export default class extends Controller {
                 return response.text(); // Use text() instead of json()
             })
             .then(data => {
-                this.dispatch('quantity-change-from-list')
+                this.dispatch('quantity-change', {detail: {quantityChange: 1, data: data}})
             }) // Log the raw response data
             .catch(error => console.error('Error:', error));
 
@@ -114,7 +113,7 @@ export default class extends Controller {
             })
             .then(data => {
                 let favouriteAction = event.target.dataset.favouriteAction
-                this.dispatch('favourite-total-change-from-info', {detail: {favouriteAction: favouriteAction}})
+                this.dispatch('favourite-total-change', {detail: {favouriteAction: favouriteAction}})
                 if(favouriteAction === 'add'){
                     event.target.dataset.favouriteAction = 'remove'
                     event.target.classList.add('btn-danger')
@@ -149,7 +148,7 @@ export default class extends Controller {
             })
             .then(data => {
                 let favouriteAction = event.target.dataset.favouriteAction
-                this.dispatch('favourite-total-change-from-list', {detail: {favouriteAction: favouriteAction}})
+                this.dispatch('favourite-total-change', {detail: {favouriteAction: favouriteAction}})
                 if(favouriteAction === 'add'){
                     event.target.dataset.favouriteAction = 'remove'
                     event.target.classList.add('bi-heart-fill')

@@ -24,35 +24,24 @@
             cartQuantityItems: global.getTotalCartItems,
             favouriteTotalItems: global.getTotalFavouriteItems
         }) }}
-            {{ stimulus_action('global-quantity', 'changeCartQuantityFromList', 'product-info:quantity-change-from-list') }}
+            {{ stimulus_action('global-quantity', 'changeCartQuantity', 'product-info:quantity-change') }}
     >
-        <div {{ stimulus_action('global-quantity', 'changeCartQuantityFromInfo', 'product-info:quantity-change-from-info') }}>
-            <div {{ stimulus_action('global-quantity', 'changeFavouriteTotalFromInfo', 'product-info:favourite-total-change-from-info') }}>
-                <div {{ stimulus_action('global-quantity', 'changeFavouriteTotalFromList', 'product-info:favourite-total-change-from-list') }}>
-                    {% include 'public/partials/_main-nav.html.twig' %}
-                    {% include 'public/partials/_category-nav.html.twig' %}
-                    <div class="banner-container" {{ stimulus_controller('banner') }}>
-                        <div class="banner-track" data-banner-target="track">
-                            {% for banner in global.banners %}
-                                <a class="banner-item" href="{{ banner.url }}" target="_blank">
-                                    <img src="/uploads/images/{{ banner.img }}" alt="banner" />
-                                </a>
-                            {% endfor %}
-
-
-                        </div>
-                    </div>
-
-
-
-                    {% block body %}{% endblock %}
-
-
+            <div {{ stimulus_action('global-quantity', 'changeFavouriteTotal', 'product-info:favourite-total-change') }}>
+                {% include 'public/partials/_main-nav.html.twig' %}
+                {% include 'public/partials/_category-nav.html.twig' %}
+                <div class="cart-preview-container d-none" data-global-quantity-target="cartPreview">
+                    {% include('public/partials/_cart-preview.html.twig') %}
                 </div>
+                <div class="banner-container" {{ stimulus_controller('banner') }}>
+                    <div class="banner-track" data-banner-target="track">
+                        {% for banner in global.banners %}
+                            <a class="banner-item" href="{{ banner.url }}" target="_blank">
+                                <img src="/uploads/images/{{ banner.img }}" alt="banner" />
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% block body %}{% endblock %}
             </div>
-
-        </div>
-
-
     </body>
 </html>

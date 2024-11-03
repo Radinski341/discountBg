@@ -4,35 +4,44 @@ export default class extends Controller{
 
     static values = {
         cartQuantityItems: Number,
-        favouriteTotalItems: Number
-    }
-    changeCartQuantityFromList(){
-        this.cartQuantityItemsValue+= 1
-        document.getElementById('total-cart-items').innerHTML = this.cartQuantityItemsValue
-    }
-    changeCartQuantityFromInfo(event){
-        console.log(event.detail.detail.quantityChange)
-        this.cartQuantityItemsValue+= parseInt(event.detail.detail.quantityChange)
-        document.getElementById('total-cart-items').innerHTML = this.cartQuantityItemsValue
+        favouriteTotalItems: Number,
+        getCartUrl: String
     }
 
-    changeFavouriteTotalFromInfo(event){
-        if(event.detail.detail.favouriteAction === 'add'){
+    static targets = ['favouriteCount', 'cartCount', 'cartPreview']
+
+    closeCartPreview() {
+        this.cartPreviewTarget.classList.add('d-none');
+    }
+
+    changeCartQuantity(event){
+        this.cartQuantityItemsValue+= parseInt(event.detail.quantityChange)
+        if(this.cartQuantityItemsValue < 1 && !this.cartCountTarget.classList.contains('d-none')){
+            this.cartCountTarget.classList.add('d-none')
+        } else if(this.cartQuantityItemsValue > 0 && this.cartCountTarget.classList.contains('d-none')){
+            this.cartCountTarget.classList.remove('d-none')
+        }
+        this.cartCountTarget.innerHTML = this.cartQuantityItemsValue
+
+        this.cartPreviewTarget.innerHTML = event.detail.data
+        this.cartPreviewTarget.classList.remove('d-none');
+        setTimeout(() => {
+            this.cartPreviewTarget.classList.add('d-none');
+        }, 5000)
+    }
+
+    changeFavouriteTotal(event){
+        if(event.detail.favouriteAction === 'add'){
             this.favouriteTotalItemsValue++
+            if(this.favouriteCountTarget.classList.contains('d-none')){
+                this.favouriteCountTarget.classList.remove('d-none')
+            }
         }else{
             this.favouriteTotalItemsValue--
+            if(this.favouriteTotalItemsValue < 1 && !this.favouriteCountTarget.classList.contains('d-none')){
+                this.favouriteCountTarget.classList.add('d-none')
+            }
         }
-
-        document.getElementById('total-favourite-items').innerHTML = this.favouriteTotalItemsValue
-    }
-
-    changeFavouriteTotalFromList(event){
-        if(event.detail.detail.favouriteAction === 'add'){
-            this.favouriteTotalItemsValue++
-        }else{
-            this.favouriteTotalItemsValue--
-        }
-
-        document.getElementById('total-favourite-items').innerHTML = this.favouriteTotalItemsValue
+        this.favouriteCountTarget.innerHTML = this.favouriteTotalItemsValue
     }
 }
