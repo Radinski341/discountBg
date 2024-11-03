@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Cart;
 use App\Repository\BannerRepository;
 use App\Repository\CategoryRepository;
 
@@ -50,14 +51,18 @@ class GlobalVariables
 
     public function getCart()
     {
+        $request = $this->container->get('request_stack');
+        $session = $request->getSession();
         $user = $this->security->getUser();
         if($user){
             $cart = $user->getCart();
-        }else{
-            $request = $this->container->get('request_stack');
-            $session = $request->getSession();
+        }else if ($session->get('cart')){
             $serializedCart = $session->get('cart');
             $cart = unserialize($serializedCart);
+        } else{
+            $cart = new Cart();
+            $serializedCart = serialize($cart);
+            $session->set('cart', $serializedCart);
         }
 
         return $cart;
