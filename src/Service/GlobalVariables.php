@@ -46,6 +46,8 @@ class GlobalVariables
 
     public function getMainCategories()
     {
+//        $mainCategories = $this->mainCategoryRepository->getAllCategoriesLevels();
+//        dd($mainCategories);
         return $this->mainCategoryRepository->getAllCategoriesLevels();
     }
 

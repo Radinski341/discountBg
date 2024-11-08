@@ -32,7 +32,6 @@ Encore
      */
     .addEntry('app', './assets/app.js')
     .addEntry('mobile-nav', './assets/scripts/mobile-nav.js')
-    .addEntry('main-nav', './assets/scripts/main-nav.js')
     .copyFiles({
         from: './assets/files'
     })

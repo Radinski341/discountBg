@@ -41,6 +41,27 @@ body {
     background: linear-gradient(to right, #6431d3 0% 30%, #ec5392 90% 100%);
 }
 
+.light-text-hover:hover{
+    background-color: whitesmoke !important;
+    color: black !important;
+}
+
+.underline-hover:hover{
+    text-decoration: underline;
+}
+
+.glow-hover:hover{
+    background:
+            radial-gradient(circle, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 70%), /* Center glow */
+            linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 70%), /* Horizontal fade */
+            linear-gradient(-45deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 70%); /* Diagonal fade */
+
+    backdrop-filter: blur(12px);
+    color: white !important;
+    transform: scale(1.05);
+    transition: all 0.3s;
+}
+
 .bg-soft-blue{
     background: #DCE6F1;
 }

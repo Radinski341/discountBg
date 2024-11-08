@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Factory\BaseCategoryFactory;
 use App\Factory\BaseSubcategoryFactory;
+use App\Factory\MainCategoryFactory;
 use App\Factory\UserFactory;
 use App\Factory\WebsiteDeliveryRoleFactory;
 use App\Factory\WebsiteFactory;
@@ -261,6 +262,31 @@ class AppFixtures extends Fixture
                 'replaceSubCategory' => $subCategory[3],
             ]);
         }
+
+        $mainCategoryRecords = [
+            ['title' => 'Дом и интериор', 'slug' => 'dom-i-interior', 'img' => 'dom-i-interior.webp'],
+            ['title' => 'Строителство', 'slug' => 'stroitelstvo', 'img' => 'stroitelstvo-i-remont.webp'],
+            ['title' => 'Свободно време', 'slug' => 'svobodno-vreme', 'img' => 'svobodno-vreme-i-transport.webp'],
+            ['title' => 'Двор и градина', 'slug' => 'dvor-i-gradina', 'img' => 'dvor-i-gradina.webp'],
+            ['title' => 'Отопление и охлаждане', 'slug' => 'otoplenie-i-ohlazdane', 'img' => 'otoplenie-i-ohlazdane.webp'],
+            ['title' => 'Козметика', 'slug' => 'kozmetika', 'img' => 'kozmetika.webp'],
+            // Additional records without images
+            ['title' => 'Здраве и красота', 'slug' => 'zdrave-i-krasota', 'img' => null],
+            ['title' => 'Образование', 'slug' => 'obrazovanie', 'img' => null],
+            ['title' => 'Техника', 'slug' => 'tehnika', 'img' => null],
+            ['title' => 'Хранене и напитки', 'slug' => 'hrana-i-napitki', 'img' => null],
+            ['title' => 'Спорт и фитнес', 'slug' => 'sport-i-fitness', 'img' => null],
+            ['title' => 'Пътувания и туризъм', 'slug' => 'patuvania-i-turizam', 'img' => null],
+            ['title' => 'Детски игри и забавления', 'slug' => 'detski-igri-i-zabavlenia', 'img' => null],
+            ['title' => 'Изкуство и хоби', 'slug' => 'izkustvo-i-hobi', 'img' => null],
+            ['title' => 'Кулинарни рецепти', 'slug' => 'kulinarni-recepti', 'img' => null],
+            ['title' => 'Финанси и бизнес', 'slug' => 'finansi-i-biznes', 'img' => null],
+        ];
+
+        foreach ($mainCategoryRecords as $record) {
+            MainCategoryFactory::new()->create($record);
+        }
+
         $manager->flush();
     }
 }

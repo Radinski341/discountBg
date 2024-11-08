@@ -2,6 +2,7 @@
 
 namespace App\Factory;
 
+use App\Entity\Cart;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -72,6 +73,11 @@ final class UserFactory extends ModelFactory
             ->afterInstantiate(function(User $user): void {
                 if($user->getPlainPassword()){
                     $user->setPassword($this->passwordHasher->hashPassword($user, $user->getPlainPassword()));
+                }
+
+                if(!$user->getCart()){
+                    $cart = new Cart();
+                    $user->setCart($cart);
                 }
 
             })

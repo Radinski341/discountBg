@@ -1,28 +1,29 @@
 <nav class="navbar navbar-expand navbar-dark bg-AI responsive-nav ps-xl-5 ps-md-4 ps-sm-2" aria-label="Second navbar example" style="height: 42px; opacity: 99%; z-index: 2">
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarsExample02">
-            <ul class="navbar-nav me-auto responsive-nav-visible-items">
-                {% for mainCategory in global.mainCategories %}
-                    <li class="nav-item dropdown responsive-nav-item activate-dropdown">
-                        <a class="nav-link dropdown-toggle text-white" href="#" id="responsiveDropdown"  aria-expanded="false">
-                            {{ mainCategory.title }}
-                        </a>
-                        <ul class="dropdown-menu bg-white border-0 m-0" aria-labelledby="responsiveDropdown" data-bs-popper="static">
-                            {% for category in mainCategory.categories %}
-                                <li><a class="dropdown-item nav-link text-black" href="{{ path('app_public_category_products', {'categorySlug': category.slug})}}">{{ category.title }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% endfor %}
-
-                <li class="nav-item dropdown rest-of-links d-none">
+            <ul class="navbar-nav" {{ stimulus_controller('responsive-nav') }}>
+                <li class="nav-item dropdown rest-of-links d-none" data-responsive-nav-target="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="responsiveDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-distribute-vertical"></i>
                     </a>
-                    <ul class="dropdown-menu bg-dark border-0 responsive-nav-toggle-items" aria-labelledby="responsiveDropdown">
+                    <ul class="dropdown-menu bg-dark border-0 responsive-nav-toggle-items overflow-hidden" aria-labelledby="responsiveDropdown" data-responsive-nav-target="dropdownItems">
 
                     </ul>
                 </li>
+                {% for mainCategory in global.mainCategories %}
+                    <li style="min-width: fit-content;" class="nav-item responsive-nav-item  {{ mainCategory.categories | length > 0 ? 'dropdown activate-dropdown' : '' }}" data-responsive-nav-target="category">
+                        <a style="min-width: fit-content;" class="nav-link text-white glow-hover {{ mainCategory.categories | length > 0 ? 'dropdown-toggle' : '' }}" href="{{ path('app_public_main_category_products', {mainCategorySlug: mainCategory.slug}) }}">
+                            {{ mainCategory.title }}
+                        </a>
+                        {% if mainCategory.categories | length > 0 %}
+                            <ul class="dropdown-menu border-0 m-0 bg-dark overflow-hidden" aria-labelledby="responsiveDropdown" data-bs-popper="static">
+                                {% for category in mainCategory.categories %}
+                                    <li><a class="dropdown-item nav-link text-white glow-hover" href="{{ path('app_public_category_products', {'categorySlug': category.slug})}}">{{ category.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
             </ul>
         </div>
         <div class="mobile-category-nav mx-0">
@@ -41,7 +42,6 @@
                                 {{ stimulus_action('search', 'onInputChange') }}
                                 data-search-target="searchInput"
                         >
-
                         <button class="btn btn-outline-light" type="submit" id="searchButton">
                             <i class="bi bi-search"></i>
                         </button>
@@ -50,7 +50,6 @@
 
                     </ul>
                 </div>
-
         </div>
     </div>
 </nav>

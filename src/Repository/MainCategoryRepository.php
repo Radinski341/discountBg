@@ -39,8 +39,8 @@ class MainCategoryRepository extends ServiceEntityRepository
     public function getAllCategoriesLevels()
     {
         return $this->createQueryBuilder('m')
-            ->innerJoin('m.categories', 'c')
-            ->innerJoin('c.subCategories', 's')
+            ->leftJoin('m.categories', 'c')
+            ->leftJoin('c.subCategories', 's')
             ->getQuery()
             ->getResult()
         ;

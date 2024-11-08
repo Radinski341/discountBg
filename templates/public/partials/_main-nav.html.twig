@@ -9,10 +9,10 @@
                 <div class="navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav d-flex flex-row">
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="{{ path('app_homepage') }}">Начало</a>
+                            <a class="nav-link text-white glow-hover" href="{{ path('app_homepage') }}">Начало</a>
                         </li>
                         <li class="nav-item mx-3 mx-lg-0">
-                            <a class="nav-link text-white" href="#">Контакт</a>
+                            <a class="nav-link text-white glow-hover" href="#">Контакт</a>
                         </li>
                     </ul>
                     <div class="container main-nav-search-bar d-none d-lg-flex" {{ stimulus_controller('search', {
@@ -31,7 +31,7 @@
                                     data-search-target="searchInput"
                             >
 
-                            <button class="btn btn-outline-light" type="submit" id="searchButton">
+                            <button class="btn btn-outline-light glow-hover" type="submit" id="searchButton">
                                 <i class="bi bi-search"></i>
                             </button>
                         </form>
@@ -68,7 +68,7 @@
                     <button class="nav-item btn-lg dropdown-toggle text-white bg-transparent border-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="{{ global.getUserAvatar }}" style="width: 40px"/>
                     </button>
-                    <ul class="dropdown-menu z-3" aria-labelledby="userDropdown">
+                    <ul style="transform: translateX(-100%)" class="dropdown-menu z-3 start-100" aria-labelledby="userDropdown">
                         <li>
                             <a class="dropdown-item" href="{{ path('app_public_profile') }}">
                                 <span class="float-end"><i class="bi bi-person-lines-fill"></i></span>
