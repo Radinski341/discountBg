@@ -7,6 +7,7 @@ use App\Entity\OrderTransaction;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class OrderEndpointController extends AbstractController
 {
     #[Route(path: '/admin/api/change-order-status', name: 'app_api_change_order_status', methods: 'POST')]
-    public function changeOrderStatus(Request $request, OrderRepository $orderRepository, EntityManagerInterface $entityManager): Response
+    public function changeOrderStatus(Request $request, OrderRepository $orderRepository, EntityManagerInterface $entityManager): JsonResponse
     {
         $jsonContent = $request->getContent();
         $jsonData = json_decode($jsonContent, true);
@@ -79,11 +80,11 @@ class OrderEndpointController extends AbstractController
         $entityManager->persist($order);
         $entityManager->flush();
 
-        return new Response('', 200, [
+        return new JsonResponse([
             'status' => $order->getStatus(),
             'statusDescription' => $order->getStatusDescription(),
             'error' => $errorMessage
-        ]);
+        ], 200);
     }
 
     #[Route(path: '/admin/api/get-order-status', name: 'app_api_get_order_status', methods: 'POST')]

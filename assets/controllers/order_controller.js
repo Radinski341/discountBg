@@ -40,12 +40,12 @@ export default class extends Controller{
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    return response.headers;
+                    return response.json();
                 })
                 .then(data => {
-                    if( data.get('error')){
+                    if( data.error){
                         Swal.fire({
-                            title: data.get('error'),
+                            title: data.error,
                             icon: 'error'
                         });
                     }else{

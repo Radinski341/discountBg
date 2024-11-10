@@ -73,6 +73,7 @@ class AdminOrderController extends AbstractController
     {
         $orderId = $request->get('orderId');
         $order = $orderRepository->findOneBy(['id' => $orderId]);
+        $orderedBy = $order->getUser();
         $user = $this->getUser();
         $statusChoices = [
             OrderTransaction::STATUS_PENDING,
@@ -115,7 +116,8 @@ class AdminOrderController extends AbstractController
             'statusChoices' => $statusChoices,
             'statusChoiceColors' => $statusChoiceColors,
             'statusButtons' => $statusButtons,
-            'allowActions' => $allowActions
+            'allowActions' => $allowActions,
+            'orderedBy' => $orderedBy
         ]);
     }
 }

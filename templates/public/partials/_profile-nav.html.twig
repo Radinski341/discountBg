@@ -1,5 +1,5 @@
 <div class="profile-nav-container" {{ stimulus_controller('profile-mobile-nav') }}>
-    <div class="profile-card bg-AI" {{ stimulus_action('profile-mobile-nav', 'toggleNav', 'click') }}>
+    <div class="profile-card bg-dark" {{ stimulus_action('profile-mobile-nav', 'toggleNav', 'click') }}>
         <img src="{{ global.getUserAvatar }}"/>
         <div class="user-info">
             <h5>{{ global.getGlobalUser.fullName }}</h5>

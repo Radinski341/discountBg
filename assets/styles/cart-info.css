@@ -1,0 +1,31 @@
+
+
+@media only screen and (max-width: 500px){
+    .extend-cart-product{
+        flex-direction: column;
+    }
+
+    .extend-cart-product-row{
+        width: 100%;
+    }
+
+    .extend-cart-payment-info{
+        text-align: left;
+    }
+
+    .extend-cart-payment-info h2{
+        font-size: 18px;
+    }
+
+    .extend-cart-payment-info h3{
+        font-size: 16px;
+    }
+
+    .extend-cart-payment-info h4{
+        font-size: 14px;
+    }
+
+    .extend-cart-payment-info h5{
+        font-size: 12px;
+    }
+}

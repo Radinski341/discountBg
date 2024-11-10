@@ -150,3 +150,13 @@
         display: none;
     }
 }
+
+@media only screen and (max-width: 400px){
+    .profile-info{
+        padding: 10px;
+    }
+
+    .info-row {
+        grid-template-columns: 35% 70%;
+    }
+}

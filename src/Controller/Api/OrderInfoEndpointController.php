@@ -6,6 +6,7 @@ use App\Entity\OrderTransaction;
 use App\Repository\OrderTransactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -53,7 +54,7 @@ class OrderInfoEndpointController extends AbstractController
     }
 
     #[Route(path: '/admin/api/get-status-description', name: 'app_api_get_status_description', methods: 'POST')]
-    public function getStatusDescription(Request $request, OrderTransactionRepository $orderTransactionRepository): Response
+    public function getStatusDescription(Request $request, OrderTransactionRepository $orderTransactionRepository): JsonResponse
     {
         $jsonContent = $request->getContent();
         $jsonData = json_decode($jsonContent, true);
@@ -62,10 +63,14 @@ class OrderInfoEndpointController extends AbstractController
 
         $transaction = $orderTransactionRepository->findOneBy(['id' => $transactionId]);
 
+        if (!$transaction) {
+            return new JsonResponse(['error' => 'Transaction not found'], 404);
+        }
+
         $transactionArray = [];
         $transactionArray['image'] = $transaction->getProductImage();
         $transactionArray['statusDescription'] = $transaction->getStatusDescription();
         $transactionArray['status'] = $transaction->getStatus();
-        return new Response('s',200 , $transactionArray);
+        return new JsonResponse($transactionArray, 200);
     }
 }

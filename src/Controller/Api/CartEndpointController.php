@@ -61,8 +61,8 @@ class CartEndpointController extends AbstractController
                $entityManager->persist($productOrder);
             }
             $entityManager->flush();
+            $entityManager->refresh($cart);
         }
-
         elseif(!$session->get('cart')) {
             $cart = new Cart();
             $productOrder = $cartService->createProductOrder($cart, $product, $choice, $quantity);
@@ -89,7 +89,7 @@ class CartEndpointController extends AbstractController
         }
 
         $entityManager->flush();
-
+        dump($cart->getProductOrders());
         return $this->render('public/partials/_cart-preview.html.twig', [
             'cart' => $cart
         ]);
@@ -98,7 +98,6 @@ class CartEndpointController extends AbstractController
     #[Route(path: '/api/remove-from-cart', name:'app_api_remove_from_cart', methods: 'POST')]
     public function removeFromCart(Request $request, EntityManagerInterface $entityManager, CartService $cartService, ProductOrderRepository $productOrderRepository): Response
     {
-
         $jsonContent = $request->getContent();
         $jsonData = json_decode($jsonContent, true);
 
@@ -125,14 +124,18 @@ class CartEndpointController extends AbstractController
 
         $products = $cartService->findCartProducts($cart);
         $totalQuantity = $cartService->cartTotalQuantity($cart);
-        $totalPrice = $cartService->cartTotalPrice($cart)['totalNewPrice'];
-        $totalOldPrice = $cartService->cartTotalPrice($cart)['totalOldPrice'];
+        $prices = $cartService->cartTotalPrice($cart);
+
+        $totalPrice = $prices['totalNewPrice'];
+        $totalOldPrice = $prices['totalOldPrice'];
+        $totalDeliveryPrice = $prices['totalDeliveryPrice'];
 
         return $this->render('public/partials/_cart-info.html.twig', [
             'products' => $products,
             'totalQuantity' => $totalQuantity,
             'totalPrice' => $totalPrice,
             'totalOldPrice' => $totalOldPrice,
+            'totalDeliveryPrice' => $totalDeliveryPrice,
             'stripe_public_key' => $this->getParameter('stripe_public_key'),
             'stripe_secret_key' => $this->getParameter('stripe_secret_key')
         ]);

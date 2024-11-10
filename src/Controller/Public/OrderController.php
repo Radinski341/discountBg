@@ -45,10 +45,18 @@ class OrderController extends AbstractController
     public function orderInfo(int $orderId, OrderRepository $orderRepository): Response
     {
         $order = $orderRepository->findOneBy(['user' => $this->getUser(), 'id' => $orderId]);
+        $returnedMoney = 0;
+        foreach ($order->getOrderTransactions() as $orderTransaction) {
+            if($orderTransaction->getStatus() === OrderTransaction::STATUS_RETURNED){
+                $returnedMoney += $orderTransaction->getPrice() * $orderTransaction->getQuantity();
+            }
+        }
+
         return $this->render('/public/order-info.html.twig', [
             'order' => $order,
             'statusForReturn' => OrderTransaction::STATUS_FOR_RETURN,
             'statusReturned' => OrderTransaction::STATUS_RETURNED,
+            'returnedMoney' => $returnedMoney,
         ]);
     }
 

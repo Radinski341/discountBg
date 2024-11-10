@@ -53,14 +53,13 @@ export default class extends Controller {
                 return response.text();
             })
             .then(data => {
-                this.dispatch('quantity-change', {detail: {quantityChange: quantity}})
+                this.dispatch('quantity-change', {detail: {quantityChange: quantity, data: data}})
             }) // Log the raw response data
             .catch(error => console.error('Error:', error));
 
     }
 
     addToCartFromList(){
-
         fetch(event.currentTarget.dataset.url, {
             method: 'POST',
             headers: {

@@ -11,7 +11,7 @@ export default class extends Controller{
     connect() {
         let orderItems = document.querySelectorAll('.order-transaction-choice')
         orderItems.forEach(item => {
-            item.style.backgroundColor = this.statusChoiceColorsValue[item.dataset.transactionStatus]
+            item.style.background = `linear-gradient(to right, white, ${this.statusChoiceColorsValue[item.dataset.transactionStatus]})`
         })
     }
 
@@ -54,7 +54,7 @@ export default class extends Controller{
                 })
                 .then(data => {
                     Swal.fire('You successfully changed the status to '+ status);
-                    currentTarget.style.backgroundColor = this.statusChoiceColorsValue[currentTarget.value]
+                    currentTarget.style.background = `linear-gradient(to right, white, ${this.statusChoiceColorsValue[currentTarget.value]})`
                 }) // Log the raw response data
                 .catch(error => console.error('Error:', error));
         }
@@ -75,13 +75,13 @@ export default class extends Controller{
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                return response.headers; // Use text() instead of json()
+                return response.json(); // Use text() instead of json()
             })
             .then(data => {
                 Swal.fire({
-                    title: 'Status: '+ data.get('status'),
-                    text: data.get('statusdescription'),
-                    imageUrl: data.get('image'),
+                    title: 'Status: '+ data.status,
+                    text: data.statusDescription,
+                    imageUrl: data.image,
                     imageWidth: 400,
                     imageHeight: 200,
                     imageAlt: "Custom image"

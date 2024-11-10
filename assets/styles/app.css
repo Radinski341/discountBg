@@ -246,6 +246,36 @@ body {
         border-radius: 10px;
         margin-bottom: 20px;
     }
+}
+
+
+@media  only screen and (max-width: 400px) {
+    .search-preview-product p{
+        font-size: 10px;
+    }
+
+    .search-preview-extend{
+        left: 0;
+        top: 0;
+    }
+
+    .logo-extend{
+        padding: 0;
+        margin: 0;
+    }
+
+    .logo-extend img{
+        width: 40px;
+        height: 40px;
+    }
+
+    .main-nav-icon-extend{
+        height: 20px !important;
+    }
+
+    .main-nav-icon-extend i{
+        font-size: 20px !important;
+    }
 
 }
 

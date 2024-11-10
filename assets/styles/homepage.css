@@ -342,3 +342,27 @@
         line-height: 30px;
     }
 }
+
+@media only screen and (max-width: 400px) {
+    .hero-message h1{font-size: 22px}
+    .hero-message h2{font-size: 16px}
+    .hero-message a{
+        font-size: 24px;
+        padding: 5px 25px;
+    }
+
+    .advantage-container i{
+        font-size: 20px;
+        margin-right: 5px;
+    }
+
+    .advantage-container h4{font-size: 15px}
+
+    .categories-carousel-title{
+        font-size: 25px;
+    }
+
+    .categories-carousel-subtitle{
+        font-size: 14px;
+    }
+}

@@ -22,7 +22,6 @@ export default class extends Controller{
             this.cartCountTarget.classList.remove('d-none')
         }
         this.cartCountTarget.innerHTML = this.cartQuantityItemsValue
-
         this.cartPreviewTarget.innerHTML = event.detail.data
         this.cartPreviewTarget.classList.remove('d-none');
         setTimeout(() => {

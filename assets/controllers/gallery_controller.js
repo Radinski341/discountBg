@@ -1,71 +1,64 @@
-import { Controller } from "stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ['galleryImage', 'mainImage']
-    showFrom = 0;
-    galleryImageTargetsCopy = this.galleryImageTargets
+    static targets = ["mainImage", "galleryImage"];
+
     connect() {
-        if(this.galleryImageTargets.length <= 4 ){
-            document.querySelector('.arrow-next-image').classList.add('d-none')
-            document.querySelector('.arrow-prev-image').classList.add('d-none')
-        }
-        this.displaySmallIMages()
-        this.galleryImageTargets.forEach(image => {
-            image.addEventListener('click', () => {
-                let newImageUrl = image.src;
-                let mainImageUrl = this.mainImageTarget.src;
-                this.mainImageTarget.src = newImageUrl
-                image.src = mainImageUrl;
-            })
-        })
+        this.currentIndex = 0; // Track the currently displayed image index
+        this.images = this.galleryImageTargets.map((img) => img.src); // Array of all images
+
+        // Set up swipe detection for mobile
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+        this.mainImageTarget.addEventListener("touchstart", this.handleTouchStart.bind(this), false);
+        this.mainImageTarget.addEventListener("touchend", this.handleTouchEnd.bind(this), false);
+
+        this.showImage(this.currentIndex); // Display the first image initially
     }
 
-    prevImage(){
-        this.mainImageTarget.src = this.galleryImageTargetsCopy[this.showFrom].src
-        this.showFrom--;
-        this.displaySmallIMages()
+    // Show the previous image
+    prevImage() {
+        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+        this.showImage(this.currentIndex);
     }
 
-    nextImage(){
-        this.mainImageTarget.src = this.galleryImageTargetsCopy[this.showFrom].src
-        this.showFrom++
-        this.displaySmallIMages()
+    // Show the next image
+    nextImage() {
+        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+        this.showImage(this.currentIndex);
     }
 
-    displaySmallIMages(){
-        this.galleryImageTargets.forEach(image => {
-            image.parentNode.classList.add('d-none')
-        })
-
-        let numberOfItems = this.galleryImageTargetsCopy.length - 4
-        if(numberOfItems > 0){
-            for(let i = 0; i <= 3 ; i++){
-                if(this.showFrom ===  this.galleryImageTargetsCopy.length){
-                    this.showFrom = 0;
-                }else if(this.showFrom < 0){
-                    this.showFrom = this.galleryImageTargetsCopy.length - 1
-                }
-                this.galleryImageTargetsCopy[this.showFrom].parentNode.classList.remove('d-none')
-                let parentNode = this.galleryImageTargetsCopy[this.showFrom].parentNode.parentNode;
-                let child = this.galleryImageTargetsCopy[this.showFrom].parentNode;
-                parentNode.removeChild(child)
-                parentNode.insertBefore(child, document.querySelector('.arrow-next-image'))
-                if(i < 3) {
-                    this.showFrom++
-                }else if(i === 3){
-                    if(this.showFrom - 3 < 0){
-                        this.showFrom =  (this.galleryImageTargetsCopy.length) + this.showFrom - 3
-                    }else{
-                        this.showFrom -= 3;
-                    }
-                }
-            }
-        }else {
-            this.galleryImageTargetsCopy.forEach(image => {
-                image.parentNode.classList.remove('d-none')
-            })
+    // Show the clicked thumbnail image
+    showSelectedImage(event) {
+        const selectedIndex = this.galleryImageTargets.indexOf(event.currentTarget);
+        if (selectedIndex !== -1) {
+            this.currentIndex = selectedIndex;
+            this.showImage(this.currentIndex);
         }
     }
 
+    // Display the image at the given index
+    showImage(index) {
+        this.mainImageTarget.src = this.images[index];
 
+        // Highlight the active thumbnail
+        this.galleryImageTargets.forEach((thumb, idx) => {
+            thumb.classList.toggle("active-thumbnail", idx === index);
+        });
+    }
+
+    // Swipe functionality for mobile
+    handleTouchStart(event) {
+        this.touchStartX = event.changedTouches[0].screenX;
+    }
+
+    handleTouchEnd(event) {
+        this.touchEndX = event.changedTouches[0].screenX;
+        this.handleSwipeGesture();
+    }
+
+    handleSwipeGesture() {
+        if (this.touchEndX < this.touchStartX) this.nextImage(); // Swipe left to go to the next image
+        if (this.touchEndX > this.touchStartX) this.prevImage(); // Swipe right to go to the previous image
+    }
 }

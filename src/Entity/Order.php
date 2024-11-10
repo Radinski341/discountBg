@@ -145,8 +145,6 @@ class Order
     public function getStatusStep(): int
     {
         switch ($this->status){
-            case self::STATUS_PENDING:
-                return 1;
             case self::STATUS_RETAKEN:
             case self::STATUS_PROBLEM:
             case self::STATUS_IN_PROGRESS:

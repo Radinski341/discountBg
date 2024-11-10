@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    {{ include('public/partials/_mobile-nav.html.twig') }}
     <section class="py-5">
         <div class="container">
             {% if(not product) %}
@@ -14,7 +15,7 @@
                     <div class="d-flex justify-content-center mb-3 overflow-hidden">
                         <i class="bi-arrow-left fs-1 arrow-prev-image" {{ stimulus_action('gallery', 'prevImage', 'click') }} style="cursor:pointer;"></i>
                         {% for image in images %}
-                        <a class="border mx-1 rounded-2 item-thumb d-none"  data-type="image" style="cursor: pointer">
+                        <a class="border mx-1 rounded-2 item-thumb"  data-type="image" style="cursor: pointer">
                             <img {{ stimulus_target('gallery', 'galleryImage')}} width="60" height="60" class="rounded-2" src="{{ image }}" />
                         </a>
                         {% endfor %}
@@ -81,14 +82,14 @@
                         <button
                                 type="button"
                                 name="add-to-cart"
-                                class="btn bg-AI text-white shadow-0 bi-cart-plus-fill"
+                                class="btn bg-AI text-white shadow-0 bi-cart-plus-fill mb-1"
                                 {{ stimulus_action('product-info', 'addToCart', 'click')}}
                                 data-url="{{ path('app_api_add_to_cart') }}"
                         > Добави в количка </button>
                         <button
                                 type="button"
                                 name="add-to-favourites"
-                                class="btn {{ product.isFavourite ?  'btn-danger' : 'btn-outline-danger'}} icon-hover bi-heart-fill"
+                                class="btn {{ product.isFavourite ?  'btn-danger' : 'btn-outline-danger'}} icon-hover bi-heart-fill mb-1"
                                 {{ stimulus_action('product-info', 'addToFavourite', 'click') }}
                                 data-url="{{ path('app_api_add_to_favourite') }}"
                                 data-favourite-action="{{ product.isFavourite ? 'remove' : 'add' }}"
