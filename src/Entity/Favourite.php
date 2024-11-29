@@ -12,7 +12,7 @@ class Favourite
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'favourite', cascade: ['persist', 'remove'])]

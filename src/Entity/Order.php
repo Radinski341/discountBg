@@ -20,13 +20,13 @@ class Order
     const STATUS_CLOSED = 'CLOSED';
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\OneToMany(mappedBy: 'orderParent', targetEntity: OrderTransaction::class, orphanRemoval: true)]
     private Collection $orderTransactions;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $totalPrice = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
@@ -39,7 +39,7 @@ class Order
     #[ORM\ManyToOne(inversedBy: 'processingOrders')]
     private ?User $takenBy = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $statusDescription = null;
 
     public function __construct()

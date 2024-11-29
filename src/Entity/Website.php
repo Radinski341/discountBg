@@ -12,7 +12,7 @@ class Website
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(length: 60)]
@@ -21,7 +21,7 @@ class Website
     #[ORM\OneToMany(mappedBy: 'website', targetEntity: WebsiteDeliveryRole::class, orphanRemoval: true)]
     private Collection $websiteDeliveryRoles;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $freeDeliveryOver = 0;
 
     public function __construct()

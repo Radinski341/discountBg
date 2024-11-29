@@ -17,10 +17,12 @@ class AdminOrderController extends AbstractController
     public function pendingOrders(OrderRepository $orderRepository): Response
     {
         $orders = $orderRepository->findBy(['status' => Order::STATUS_PENDING]);
+        $mercurePublicUrl = $_ENV['MERCURE_PUBLIC_URL']; // Fetch from environment variables
 
         return $this->render('/admin/orders-list.html.twig', [
             'orders' => $orders,
-            'title' => 'Pending orders'
+            'title' => 'Pending orders',
+            'mercurePublicUrl' => $mercurePublicUrl, // Pass it to Twig
         ]);
     }
 

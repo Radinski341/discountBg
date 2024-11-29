@@ -12,13 +12,13 @@ class Carousel
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $title = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $priority = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'inCarousels')]

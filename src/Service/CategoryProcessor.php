@@ -33,10 +33,12 @@ class CategoryProcessor
 
     public function processCategories(array $dataRows): void
     {
+        dump('Memory before file processing: ' . memory_get_usage());
         $newCategories = [];
         $subCategoriesToProcess = [];
         $newSubCategories = [];
-
+        $seenKeys = [];
+        $counter = 0;
         foreach ($dataRows as $row) {
             // Skip product choices
             if (isset($row['is-product-choice']) && $row['is-product-choice']) {
@@ -56,22 +58,28 @@ class CategoryProcessor
             }
 
             if ($subCategoryTitle) {
-                $subCategoriesToProcess[] = [
-                    'category' => $category,
-                    'subCategoryTitle' => $subCategoryTitle,
-                    'website' => $row['website']
-                ];
+                $key = $category->getId() . ':' . $subCategoryTitle . ':' . $row['website']; // Create a unique key
+                if(!isset($seenKeys[$key])) {
+                    $subCategoriesToProcess[] = [
+                        'category' => $category,
+                        'subCategoryTitle' => $subCategoryTitle,
+                        'website' => $row['website']
+                    ];
+                    $seenKeys[$key] = true;
+                }
             }
         }
 
         // Flush categories first
         $this->entityManager->flush();
-
+        $this->entityManager->clear();
+        unset($newCategories);
+        unset($seenKeys);
         // Process and flush subcategories
+        dump($subCategoriesToProcess);
         foreach ($subCategoriesToProcess as $item) {
             $categoryTitle = $item['category']->getTitle();
             $subCategoryTitle = $item['subCategoryTitle'];
-
             $baseSubcategoryTitle = $this->categoryMapping->getBaseSubcategory($item['website'], $categoryTitle, $subCategoryTitle) ?? $subCategoryTitle;
 
             if (!isset($newSubCategories[$categoryTitle])) {
@@ -80,11 +88,21 @@ class CategoryProcessor
 
             if (!in_array($baseSubcategoryTitle, $newSubCategories[$categoryTitle])) {
                 $this->findOrCreateSubCategory($item['category'], $baseSubcategoryTitle);
+
                 $newSubCategories[$categoryTitle][] = $baseSubcategoryTitle;
             }
         }
 
         $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        //Clear memory
+
+        unset($subCategoriesToProcess);
+        unset($newSubCategories);
+
+        gc_collect_cycles();
+        dump('Memory after file processing: ' . memory_get_peak_usage());
     }
 
     private function parseCategoryField(string $categoryField): array

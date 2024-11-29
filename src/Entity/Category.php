@@ -13,9 +13,10 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 class Category
 {
     use TimestampableEntity;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
     #[ORM\Column(length: 100)]
@@ -24,7 +25,6 @@ class Category
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Product::class, orphanRemoval: true)]
     private Collection $products;
 
-
     #[ORM\Column(length: 255)]
     #[Slug(fields: ['title'])]
     private ?string $slug = null;
@@ -32,10 +32,10 @@ class Category
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: SubCategory::class, orphanRemoval: true)]
     private Collection $subCategories;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $forDelete = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'categories')]

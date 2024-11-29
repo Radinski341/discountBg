@@ -10,8 +10,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
-use function Symfony\Component\Translation\t;
-
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -38,16 +36,12 @@ class ProductRepository extends ServiceEntityRepository
     {
         $allProducts =  $this->createQueryBuilder('p')
             ->andWhere('p.websiteName = :website')
-            ->setParameter(':website', $website)
-            ->select(['p.websiteId'])
+            ->setParameter('website', $website)
+            ->select('p.websiteId')
             ->getQuery()
-            ->getResult()
-        ;
-        $allProductsArray = [];
-        foreach ($allProducts as $product){
-            $allProductsArray[] = $product['websiteId'];
-        }
-        return $allProductsArray;
+            ->getResult();
+
+        return array_column($allProducts, 'websiteId');
     }
 
     public function createFindAllActiveProductsQueryBuilder(?Category $category, ?SubCategory $subCategory, Request $request, ?MainCategory $mainCategory = null): QueryBuilder
@@ -55,23 +49,25 @@ class ProductRepository extends ServiceEntityRepository
         $queryBuilder =  $this->createQueryBuilder('p')
             ->andWhere('p.isActive = true');
 
-        if($mainCategory){
+        if ($mainCategory) {
             $categories = $mainCategory->getCategories();
 
             if (!empty($categories)) {
                 $queryBuilder->andWhere('p.category IN (:categories)')
                     ->setParameter('categories', $categories);
             }
-        } elseif($category){
+        } elseif ($category) {
             $queryBuilder->andWhere('p.category = :category')
-                ->setParameter(':category', $category);
+                ->setParameter('category', $category);
         }
-        if($subCategory){
+
+        if ($subCategory) {
             $queryBuilder->andWhere('p.subCategory = :subCategory')
-                ->setParameter(':subCategory', $subCategory);
+                ->setParameter('subCategory', $subCategory);
         }
-        if($order = $request->get('order')){
-            switch ($order){
+
+        if ($order = $request->get('order')) {
+            switch ($order) {
                 case 'discount':
                     $queryBuilder->orderBy('p.discountPercent', 'DESC');
                     break;
@@ -82,38 +78,28 @@ class ProductRepository extends ServiceEntityRepository
                     $queryBuilder->orderBy('p.newPrice', 'DESC');
                     break;
                 default:
-                   break;
+                    break;
             }
         }
-        if($request->get('priceRangeFrom') || $request->get('priceRangeTo')){
+
+        if ($request->get('priceRangeFrom') || $request->get('priceRangeTo')) {
             $queryBuilder
                 ->andWhere('p.newPrice >= :priceRangeFrom')
-                ->setParameter(':priceRangeFrom', $request->get('priceRangeFrom'))
+                ->setParameter('priceRangeFrom', $request->get('priceRangeFrom') ?? 0)
                 ->andWhere('p.newPrice <= :priceRangeTo')
-                ->setParameter(':priceRangeTo', $request->get('priceRangeTo'));
+                ->setParameter('priceRangeTo', $request->get('priceRangeTo') ?? PHP_INT_MAX);
         }
 
         return $queryBuilder;
     }
 
-    public function findAllProductsWithChoices($productIds)
+    public function findAllProductsWithChoices(array $productIds)
     {
-        $queryBuilder = $this->createQueryBuilder('p');
-
-        foreach ($productIds as $index => $productId) {
-            if ($index === 0) {
-                // The first condition uses "where" instead of "orWhere"
-                $queryBuilder->where("p.id = :productId{$index}")
-                    ->setParameter(":productId{$index}", $productId['id']);
-            } else {
-                // Subsequent conditions use "orWhere"
-                $queryBuilder->orWhere("p.id = :productId{$index}")
-                    ->setParameter(":productId{$index}", $productId['id']);
-            }
-        }
-
-        return $queryBuilder->getQuery()->getResult();
-
+        return $this->createQueryBuilder('p')
+            ->where('p.id IN (:productIds)')
+            ->setParameter('productIds', array_column($productIds, 'id'))
+            ->getQuery()
+            ->getResult();
     }
 
     public function getProductWithChoice($productSlug, $optionValue)
@@ -121,9 +107,9 @@ class ProductRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->innerJoin('p.productChoices', 'pc')
             ->where('p.slug = :productSlug')
-            ->setParameter(':productSlug', $productSlug)
+            ->setParameter('productSlug', $productSlug)
             ->andWhere('pc.optionValue = :optionValue')
-            ->setParameter(':optionValue', $optionValue)
+            ->setParameter('optionValue', $optionValue)
             ->select([
                 'p.id',
                 'p.slug',
@@ -141,9 +127,9 @@ class ProductRepository extends ServiceEntityRepository
 
     public function getProductWithoutChoice($productSlug)
     {
-        return  $this->createQueryBuilder('p')
+        return $this->createQueryBuilder('p')
             ->where('p.slug = :productSlug')
-            ->setParameter(':productSlug', $productSlug)
+            ->setParameter('productSlug', $productSlug)
             ->select([
                 'p.id',
                 'p.slug',
@@ -161,52 +147,54 @@ class ProductRepository extends ServiceEntityRepository
 
     public function refreshForDeleteField()
     {
-        if(count($this->findAll()) > 0) {
-            return $this->createQueryBuilder('p')
-                ->update()
-                ->set('p.forDelete', true)
-                ->getQuery()
-                ->execute();
-        }
+        return $this->createQueryBuilder('p')
+            ->update()
+            ->set('p.forDelete', 'true')
+            ->getQuery()
+            ->execute();
     }
 
     public function preventFromDelete()
     {
-        if(count($this->findAll()) > 0){
-            return $this->createQueryBuilder('p')
-                ->update()
-                ->set('p.forDelete', 'false')
-                ->getQuery()
-                ->execute();
-        }
-
+        return $this->createQueryBuilder('p')
+            ->update()
+            ->set('p.forDelete', 'false')
+            ->getQuery()
+            ->execute();
     }
 
-    public function deleteALlMissingProducts($website): bool
+    public function deleteAllMissingProducts($website): bool
     {
         $productsForDelete = $this->findBy(['forDelete' => true, 'websiteName' => $website]);
-        if(count($productsForDelete) === 0){
+        dump($productsForDelete);
+        if (count($productsForDelete) === 0) {
             return false;
         }
-        foreach ($productsForDelete as $product){
-            foreach ($product->getProductOrders() as $productOrder){
+        $batchLimit = 50;
+        $batchCount = 0;
+        foreach ($productsForDelete as $product) {
+            foreach ($product->getProductOrders() as $productOrder) {
                 $this->_em->remove($productOrder);
             }
-            foreach ($product->getOrderTransactions() as $orderTransaction){
+
+            foreach ($product->getOrderTransactions() as $orderTransaction) {
                 $orderTransaction->setProduct(null);
                 $orderTransaction->setProductChoice(null);
                 $this->_em->persist($orderTransaction);
             }
-            foreach ($product->getProductChoices() as $productChoice){
-                foreach ($productChoice->getProductOrders() as $productOrder){
+
+            foreach ($product->getProductChoices() as $productChoice) {
+                foreach ($productChoice->getProductOrders() as $productOrder) {
                     $this->_em->remove($productOrder);
                 }
                 $this->_em->remove($productChoice);
             }
-
             $this->_em->remove($product);
+            if($batchCount++ >= $batchLimit) {
+                $this->_em->flush();
+                $batchCount = 0;
+            }
         }
-        $this->_em->flush();
         return true;
     }
 
@@ -218,43 +206,41 @@ class ProductRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
-        $activeProductsId = [];
-        foreach ($activeProducts as $product){
-            $activeProductsId[] = $product['id'];
-        }
-        return $activeProductsId;
+        return array_column($activeProducts, 'id');
     }
 
     public function createFindProductsBySearchQuery($query, $translatedQuery): QueryBuilder
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.isActive = true')
-            ->andWhere('p.title LIKE :query ')
-            ->setParameter('query', '%'.$query.'%')
-            ->orWhere('p.title LIKE :translatedQuery ')
-            ->setParameter('translatedQuery', '%'.$translatedQuery.'%');
+            ->andWhere('p.title ILIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->orWhere('p.title ILIKE :translatedQuery')
+            ->setParameter('translatedQuery', '%' . $translatedQuery . '%');
     }
 
     public function getSearchPreviewProducts($query, $translatedQuery)
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.isActive = true')
-            ->andWhere('p.title LIKE :query ')
-            ->setParameter('query', '%'.$query.'%')
-            ->orWhere('p.title LIKE :translatedQuery ')
-            ->setParameter('translatedQuery', '%'.$translatedQuery.'%')
+            ->andWhere('p.title ILIKE :query')
+            ->setParameter('query', '%' . $query . '%')
+            ->orWhere('p.title ILIKE :translatedQuery')
+            ->setParameter('translatedQuery', '%' . $translatedQuery . '%')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult();
     }
 
-//    public function findOneBySomeField($value): ?Product
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function deleteProductChoicesForMarkedProducts(string $website): void
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb->delete('App\Entity\ProductChoice', 'pc')
+            ->where('pc.product IN (
+            SELECT p.id FROM App\Entity\Product p WHERE p.forDelete = true AND p.websiteName = :website
+        )')
+            ->setParameter('website', $website)
+            ->getQuery()
+            ->execute();
+    }
 }

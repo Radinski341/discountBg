@@ -15,7 +15,7 @@ class SubCategory
     use TimestampableEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
     #[ORM\Column(length: 100)]
@@ -32,10 +32,10 @@ class SubCategory
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $forDelete = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $isActive = null;
 
     public function __construct()

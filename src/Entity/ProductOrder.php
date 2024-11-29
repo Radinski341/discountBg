@@ -10,11 +10,10 @@ class ProductOrder
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $quantity = null;
 
     #[ORM\ManyToOne(inversedBy: 'productOrders')]

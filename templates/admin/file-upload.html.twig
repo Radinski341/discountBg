@@ -38,18 +38,27 @@
                 {% endfor %}
             </ul>
             <hr>
-            <div {{ stimulus_controller('data-process') }}>
+            <div {{ stimulus_controller('data-process', {
+                'getFilesUrl': path('app_admin_get_files'),
+                'processCategoriesUrl': path('app_admin_category_process'),
+                'processProductsUrl': path('app_admin_data_process')
+            })}}>
                 <button
                         class="btn btn-success mt-3"
                         data-action="click->data-process#process"
-                        data-url="{{ path('app_admin_data_process') }}"
-                        data-message="Products for {{ website }} successfully updated!"
                         data-data-process-target="dataProcess"
                         data-website="{{ website }}"
                 >
                     Process {{ website }}
                 </button>
+                <div class="logs-container">
+                    <h1>Logs</h1>
+                    <div data-data-process-target="logsContainer">
+                        <p>No data yet...</p>
+                    </div>
+                </div>
             </div>
+
             <hr><hr><hr>
         {% endfor %}
     </div>

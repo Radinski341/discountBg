@@ -10,20 +10,20 @@ class WebsiteDeliveryRole
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'websiteDeliveryRoles')]
     #[ORM\JoinColumn(nullable: false)]
     private Website $website;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $min;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $max;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $deliveryPrice;
 
     public function getId(): ?int

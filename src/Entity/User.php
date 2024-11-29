@@ -12,11 +12,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
     #[ORM\Column(length: 180, unique: true)]
@@ -24,13 +25,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email(message: "Моля въведете валиден е-мейл")]
     private string $email;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
+    #[ORM\Column(type: 'string')]
     private string $password;
 
     #[Assert\NotBlank(message: "Моля въведете парола")]
@@ -71,7 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Length(min: 5, max: 255, minMessage: 'Имената не може да са по малку од 5 карактера', maxMessage: 'Имената не може да са повече од 255 карактера')]
     private ?string $fullName = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $isVerifyed = false;
 
     public function __construct()

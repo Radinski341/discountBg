@@ -13,7 +13,7 @@ class ProductChoice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -25,38 +25,38 @@ class ProductChoice
     #[ORM\Column(length: 255)]
     private ?string $optionValue = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $title = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $oldPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $originalDiscountPrice = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $newPrice = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $images = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $originalDiscountPercent = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $discountPercent = null;
-    
-    #[ORM\ManyToOne( inversedBy: 'productChoices')]
+
+    #[ORM\ManyToOne(inversedBy: 'productChoices')]
     #[ORM\JoinColumn(nullable: false)]
     private Product $product;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private bool $forDelete;
 
     #[ORM\OneToMany(mappedBy: 'productChoice', targetEntity: ProductOrder::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $productOrders;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $productUrl = null;
 
     #[ORM\OneToMany(mappedBy: 'productChoice', targetEntity: FavouriteOrder::class, cascade: ['remove'], orphanRemoval: true)]

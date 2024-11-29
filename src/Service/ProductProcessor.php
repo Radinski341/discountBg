@@ -7,6 +7,7 @@ use App\Entity\Product;
 use App\Entity\ProductChoice;
 use App\Entity\SubCategory;
 use App\Repository\BaseCategoryRepository;
+use App\Repository\BaseSubcategoryRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductChoiceRepository;
 use App\Repository\ProductRepository;
@@ -23,6 +24,7 @@ class ProductProcessor
     private BaseCategoryRepository $baseCategoryRepository;
     private CategoryRepository $categoryRepository;
     private SubCategoryRepository $subCategoryRepository;
+    private BaseSubcategoryRepository $baseSubCategoryRepository;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -30,6 +32,7 @@ class ProductProcessor
         ProductRepository $productRepository,
         ProductChoiceRepository $productChoiceRepository,
         BaseCategoryRepository $baseCategoryRepository,
+        BaseSubCategoryRepository $baseSubCategoryRepository,
         CategoryRepository $categoryRepository,
         SubCategoryRepository $subCategoryRepository
     )
@@ -41,6 +44,7 @@ class ProductProcessor
         $this->baseCategoryRepository = $baseCategoryRepository;
         $this->categoryRepository = $categoryRepository;
         $this->subCategoryRepository = $subCategoryRepository;
+        $this->baseSubCategoryRepository = $baseSubCategoryRepository;
     }
 
     private function getCategoryAndSubcategory($allCategoryLevels): array
@@ -58,45 +62,28 @@ class ProductProcessor
         ];
     }
 
-    private function findCategory($allCategoryLevels, $allCategories, $allBaseCategories): Category
+    private function findCategory($allCategoryLevels): Category
     {
-        $matchingCategory = null;
         $categoryTitle = $this->getCategoryAndSubcategory($allCategoryLevels)['category'];
-        foreach ($allBaseCategories as $baseCategory) {
-            if($categoryTitle === $baseCategory->getReplaceCategory()){
-                return $this->categoryRepository->findOneBy(['title' => $baseCategory->getTitle()]);
-            }
-        }
-        foreach ($allCategories as $category){
-            if($categoryTitle === $category->getTitle()){
-                $matchingCategory =  $category;
-            }
+        $baseCategory = $this->baseCategoryRepository->findOneBy(['replaceCategory' => $categoryTitle]);
+        if($baseCategory){
+            return $this->categoryRepository->findOneBy(['title' => $baseCategory->getTitle()]);
         }
 
-        return $matchingCategory;
+        return $this->categoryRepository->findOneBy(['title' => $categoryTitle]);
     }
 
-    private function findSubCategory($allCategoryLevels,$allCategories, $allSubCategories, $allBaseCategories, $allBaseSubcategories): SubCategory
+    private function findSubCategory($allCategoryLevels): SubCategory
     {
-        $category = $this->findCategory($allCategoryLevels, $allCategories, $allBaseCategories);
-
-        foreach ($allBaseSubcategories as $baseSubcategory){
-            if(
-                $this->getCategoryAndSubcategory($allCategoryLevels)['subCategory'] === $baseSubcategory->getReplaceSubCategory()
-                && $category->getTitle() === $baseSubcategory->getCategory()
-            ){
-                return $this->subCategoryRepository->findOneBy(['title' => $baseSubcategory->getTitle()]);
-            }
+        $category = $this->findCategory($allCategoryLevels);
+        $categoryTitle = $category->getTitle();
+        $processingRecordCategoriesAndSubcategories = $this->getCategoryAndSubcategory($allCategoryLevels);
+        $processingRecordSubCategory = $processingRecordCategoriesAndSubcategories['subCategory'];
+        $baseSubcategory = $this->baseSubCategoryRepository->findOneBy(['replaceSubcategory' => $processingRecordSubCategory, 'category' => $categoryTitle]);
+        if($baseSubcategory){
+            return $this->subCategoryRepository->findOneBy(['title' => $baseSubcategory->getTitle()]);
         }
-
-        $matchingSubCategory = null;
-        foreach ($allSubCategories as $subCategory){
-            if($this->getCategoryAndSubcategory($allCategoryLevels)['subCategory'] === $subCategory->getTitle() && $category === $subCategory->getCategory()){
-                $matchingSubCategory = $subCategory;
-            }
-        }
-
-        return $matchingSubCategory;
+        return $this->subCategoryRepository->findOneBy(['title' => $processingRecordSubCategory, 'category' => $category]);
     }
 
 
@@ -138,58 +125,45 @@ class ProductProcessor
         return 0;
     }
 
-    public function createNewProduct($row, $allCategories, $allSubCategories, $allBaseCategories, $allBaseSubcategories, $deliveryPriceRoles): void
+    public function createNewProduct($row, $deliveryPriceRoles): void
     {
-        $newDiscountPercent = $this->newDiscountPercentLogic($row['new-price'], $row['discount-percent']);
-        $product = new Product();
-        $product->setTitle($row['title']);
-        $product->setWebsiteName($row['website']);
-        $product->setWebsiteUrl($row['website-url']);
-        $product->setWebsiteId($row['website-id']);
-        $product->setCategory($this->findCategory($row['categories'], $allCategories, $allBaseCategories));
-        $product->setSubCategory($this->findSubCategory($row['categories'], $allCategories, $allSubCategories, $allBaseCategories, $allBaseSubcategories));
-        $product->setImages($row['images']);
-        $product->setNewPrice($this->newPriceLogic($row['old-price'], $newDiscountPercent));
-        $product->setOldPrice($row['old-price']);
-        $product->setDeliveryPrice($this->newDeliveryPriceLogic($deliveryPriceRoles, $row['new-price']));
-        $product->setOriginalDiscountPrice($row['new-price']);
-        $product->setOriginalDiscountPercent($row['discount-percent']);
-        $product->setDiscountPercent($newDiscountPercent);
-        $product->setOptionTypes('');
-        $product->setOptions('');
-        $product->setProductUrl($row['product-url']);
-        $product->setDescription($row['description-html']);
-        $product->setForDelete(false);
-        $product->setIsActive(true);
-        $product->setCreatedAt(new \DateTime());
-        $product->setUpdatedAt(new \DateTime());
+        try {
+            $newDiscountPercent = $this->newDiscountPercentLogic($row['new-price'], $row['discount-percent']);
+            $product = new Product();
+            $product->setTitle($row['title']);
+            $product->setWebsiteName($row['website']);
+            $product->setWebsiteUrl($row['website-url']);
+            $product->setWebsiteId($row['website-id']);
+            $product->setCategory($this->findCategory($row['categories']));
+            $product->setSubCategory($this->findSubCategory($row['categories']));
+            $product->setImages($row['images']);
+            $product->setNewPrice($this->newPriceLogic($row['old-price'], $newDiscountPercent));
+            $product->setOldPrice($row['old-price']);
+            $product->setDeliveryPrice($this->newDeliveryPriceLogic($deliveryPriceRoles, $row['new-price']));
+            $product->setOriginalDiscountPrice($row['new-price']);
+            $product->setOriginalDiscountPercent($row['discount-percent']);
+            $product->setDiscountPercent($newDiscountPercent);
+            $product->setOptionTypes('');
+            $product->setOptions('');
+            $product->setProductUrl($row['product-url']);
+            $product->setDescription($row['description-html']);
+            $product->setForDelete(false);
+            $product->setIsActive(true);
+            $product->setCreatedAt(new \DateTime());
+            $product->setUpdatedAt(new \DateTime());
 
-        $this->entityManager->persist($product);
+            $this->entityManager->persist($product);
+        } catch (\Exception $exception){
+            dump('Product creation error: ' . $exception->getMessage());
+        }
+
 
     }
 
-    public function getExistingProduct($websiteId, $allProducts): ?Product
-    {
-        $matchingProduct = null;
-        forEach($allProducts as $product){
-            if($product->getWebsiteId() === $websiteId) {
-                $matchingProduct = $product;
-                break;
-            }
-        }
-        return $matchingProduct;
-    }
 
-    public function getExistingProductChoice($websiteId, $allProductChoices)
+    public function getExistingProductChoice($websiteId)
     {
-        $matchingProductChoice = null;
-        foreach ($allProductChoices as $productChoice){
-            if($productChoice->getWebsiteId() === $websiteId){
-                $matchingProductChoice = $productChoice;
-                break;
-            }
-        }
-        return $matchingProductChoice;
+        return $this->productChoiceRepository->findOneBy(['websiteId' => $websiteId]);
     }
 
     public function checkIfProductUpdated($currentData, Product $product): Product
@@ -209,7 +183,7 @@ class ProductProcessor
         return $product;
     }
 
-    public function createProductChoices($productChoices, $allProductChoices): void
+    public function createProductChoices($productChoices): void
     {
         $existingProductChoices = $this->productChoiceRepository->findAllProductsWebsiteId();
         foreach ($productChoices as $productChoice){
@@ -233,7 +207,7 @@ class ProductProcessor
                     $product->setForDelete(false);
                     $this->entityManager->persist($product);
                 }else{
-                    $existingProductChoice = $this->getExistingProductChoice($productChoice['website-id'], $allProductChoices);
+                    $existingProductChoice = $this->getExistingProductChoice($productChoice['website-id']);
                     $existingProductChoice->setForDelete(false);
                     $this->entityManager->persist($existingProductChoice);
                 }

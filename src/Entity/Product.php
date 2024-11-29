@@ -16,7 +16,7 @@ class Product
     use TimestampableEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
     #[ORM\Column(length: 60)]
@@ -28,7 +28,7 @@ class Product
     #[ORM\Column(length: 255)]
     private string $websiteId;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private string $productUrl;
 
     #[ORM\Column(length: 255)]
@@ -38,48 +38,48 @@ class Product
     #[Slug(fields: ['title'])]
     private ?string $slug = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $oldPrice;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $newPrice;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $originalDiscountPrice;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $originalDiscountPercent;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $discountPercent;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private string $images;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $optionTypes = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $options = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $forDelete = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     private ?SubCategory $subCategory = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'boolean')]
     private ?bool $isActive = null;
 
-    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductChoice::class,cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductChoice::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $productChoices;
 
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: ProductOrder::class, cascade: ['remove'], orphanRemoval: true)]
@@ -88,17 +88,16 @@ class Product
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: FavouriteOrder::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $favouriteOrders;
 
-
-    private bool $isFavourite = false;
-
     #[ORM\OneToMany(mappedBy: 'product', targetEntity: OrderTransaction::class)]
     private Collection $orderTransactions;
 
     #[ORM\ManyToMany(targetEntity: Carousel::class, mappedBy: 'products')]
     private Collection $inCarousels;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private float $deliveryPrice = 0;
+
+    private bool $isFavourite = false;
 
     public function __construct()
     {

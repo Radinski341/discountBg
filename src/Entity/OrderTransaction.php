@@ -17,7 +17,7 @@ class OrderTransaction
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderTransactions')]
@@ -26,13 +26,13 @@ class OrderTransaction
     #[ORM\ManyToOne(inversedBy: 'orderTransactions')]
     private ?ProductChoice $productChoice = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $originalWebsiteUrl = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $quantity = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $price = null;
 
     #[ORM\ManyToOne(inversedBy: 'orderTransactions')]
@@ -42,10 +42,10 @@ class OrderTransaction
     #[ORM\Column(length: 30, nullable: false)]
     private ?string $status = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $statusDescription = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: 'text')]
     private ?string $productImage = null;
 
     #[ORM\Column(length: 255)]

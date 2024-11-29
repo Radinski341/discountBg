@@ -7,6 +7,7 @@ use App\Entity\OrderTransaction;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
 use App\Service\CartService;
+use App\Service\OrderPublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Stripe\PaymentIntent;
 use Stripe\Stripe;
@@ -61,7 +62,7 @@ class OrderController extends AbstractController
     }
 
     #[Route(path: '/pass-order', name: 'app_public_pass_order', methods: ['POST'])]
-    public function passOrder(CartRepository $cartRepository, EntityManagerInterface $entityManager, Request $request, CartService $cartService): Response
+    public function passOrder(CartRepository $cartRepository, EntityManagerInterface $entityManager, Request $request, CartService $cartService, OrderPublisher $orderPublisher): Response
     {
         $user = $this->getUser();
         if (!$user) {
@@ -127,7 +128,7 @@ class OrderController extends AbstractController
                 $entityManager->flush();
 
                 $this->addFlash('success', 'Your payment was successful and your order has been placed.');
-
+                $orderPublisher->publishNewPendingOrder($order->getId());
                 return new JsonResponse([
                     'redirect' => $this->generateUrl('app_homepage'),
                     'client_secret' => $intent->client_secret
