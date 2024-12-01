@@ -72,7 +72,6 @@ class CategoryProcessor
 
         // Flush categories first
         $this->entityManager->flush();
-        $this->entityManager->clear();
         unset($newCategories);
         unset($seenKeys);
         // Process and flush subcategories
@@ -94,7 +93,6 @@ class CategoryProcessor
         }
 
         $this->entityManager->flush();
-        $this->entityManager->clear();
 
         //Clear memory
 
@@ -116,7 +114,9 @@ class CategoryProcessor
     private function findOrCreateCategory(string $title): Category
     {
         $category = $this->categoryRepository->findOneBy(['title' => $title]);
+        dump($category);
         if (!$category) {
+            dump('Category not found and creating it');
             $category = new Category();
             $category->setTitle($title);
             $category->setForDelete(false);

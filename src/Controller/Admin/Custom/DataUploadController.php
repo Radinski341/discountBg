@@ -142,103 +142,120 @@ class DataUploadController extends AbstractController
         WebsiteRepository $websiteRepository
     ): Response
     {
-        try {
-            $requestBody = json_decode($request->getContent(), true);
-            $website = $requestBody['website'];
-            $fileName = $requestBody['fileName'];
+        $requiredKeys = [
+            'is-product-choice',
+            'website',
+            'website-url',
+            'website-id',
+            'product-url',
+            'title',
+            'old-price',
+            'new-price',
+            'discount-percent',
+            'images',
+            'categories',
+            'description-html',
+        ];
+        $exceptionLogs = [];
+        $newProducts = 0;
+        $existingProducts = 0;
 
-            $filePath = $this->getParameter('kernel.project_dir') . '/src/Data/' . $website . '/' . $fileName;
-            if(!file_exists($filePath)){
-                return new JsonResponse(['error' => 'File not found' . $filePath], 404);
-            }
+        $requestBody = json_decode($request->getContent(), true);
+        $website = $requestBody['website'];
+        $fileName = $requestBody['fileName'];
 
-            $existingProductsByWebsiteId = $productRepository->findAllProductsWebsiteId($website);
-            $deliveryPriceRoles = $websiteRepository->findOneBy(['websiteName' => $website])->getWebsiteDeliveryRoles();
-            $formatedPriceRoles = [];
-            foreach ($deliveryPriceRoles as $deliveryPriceRole) {
-                $formatedPriceRoles[] = [
-                    'min' => $deliveryPriceRole->getMin(),
-                    'max' => $deliveryPriceRole->getMax(),
-                    'deliveryPrice' => $deliveryPriceRole->getDeliveryPrice(),
-                ];
-            }
-            $choiceProductsArray = [];
-
-
-            $jsonData = file_get_contents($filePath);
-            $data = json_decode($jsonData, true);
-            $batchLimit = 50;
-            $batchCounter = 0;
-            foreach ($data as $row) {
-                if ($row['is-product-choice']) {
-                    $choiceProductsArray[] = $row;
-                    continue;
-                }
-                if (!$row['new-price'] || !$row['old-price'] || !$row['discount-percent'] || !$row['images']) continue;
-
-                if (!in_array($row['website-id'], $existingProductsByWebsiteId)) {
-                    try {
-                        $productProcessor->createNewProduct($row, $formatedPriceRoles);
-                    } catch (\Exception $exception){
-                        dump('Exception at creating product: ' .$exception->getMessage());
-                    }
-
-                } else {
-                    try {
-                        $existingProduct = $productRepository->findOneBy(['websiteId' => $row['website-id']]);
-                        $existingProduct = $productProcessor->checkIfProductUpdated($row, $existingProduct);
-                        $existingProduct->setForDelete(false);
-                        $entityManager->persist($existingProduct);
-                    } catch (\Exception $exception){
-                        dump('Exception at excisting product: ' . $exception->getMessage());
-                    }
-
-                }
-                if($batchCounter++ >= $batchLimit) {
-                    try{
-
-                        dump('Batch ' . $batchCounter . ' processed');
-                        $entityManager->flush();
-                        $entityManager->clear();
-                        $batchCounter = 0;
-                    } catch (\Exception $exception) {
-                        dump('We got exception: ' . $exception->getMessage());
-                    }
-
-                }
-            }
-
-            dump('Memory after 1 file processed: ' . memory_get_usage());
-
-
-            dump('Memory after all files processed: ' . memory_get_usage());
-//            $productRepository->deleteProductChoicesForMarkedProducts($website);
-            try {
-                $productRepository->deleteALlMissingProducts($website);
-            } catch (Exception $exception){
-                dump('We got exception at deleting products: ' . $exception->getMessage());
-            }
-            try {
-                $productRepository->refreshForDeleteField();
-            } catch (Exception $exception){
-                dump('We got exception at refresh delete fields: ' . $exception->getMessage());
-            }
-
-
-//            $productProcessor->createProductChoices($choiceProductsArray);
-//            $productProcessor->createProductOptions();
-//            if (!$productRepository->deleteALlMissingProducts($website)) {
-//                $productChoiceRepository->deleteALlMissingProductChoices($website);
-//            }
-//            $productRepository->refreshForDeleteField();
-//            $productChoiceRepository->refreshForDeleteField();
-            return new JsonResponse($choiceProductsArray, 200);
-        } catch (Exception $error){
-            dump($error);
+        $filePath = $this->getParameter('kernel.project_dir') . '/src/Data/' . $website . '/' . $fileName;
+        if(!file_exists($filePath)){
+            return new JsonResponse(['error' => 'File not found' . $filePath], 404);
         }
 
-//        $this->addFlash('success', "Data updated successfully");
-        return new JsonResponse('Fail', 400);
+        $existingProductsByWebsiteId = $productRepository->findAllProductsWebsiteId($website);
+        $deliveryPriceRoles = $websiteRepository->findOneBy(['websiteName' => $website])->getWebsiteDeliveryRoles();
+        $formatedPriceRoles = [];
+        foreach ($deliveryPriceRoles as $deliveryPriceRole) {
+            $formatedPriceRoles[] = [
+                'min' => $deliveryPriceRole->getMin(),
+                'max' => $deliveryPriceRole->getMax(),
+                'deliveryPrice' => $deliveryPriceRole->getDeliveryPrice(),
+            ];
+        }
+        $choiceProductsArray = [];
+
+        $jsonData = file_get_contents($filePath);
+        $data = json_decode($jsonData, true);
+        $batchLimit = 50;
+        $batchCounter = 0;
+        foreach ($data as $index => $row) {
+            if ($row['is-product-choice']) {
+                $choiceProductsArray[] = $row;
+                continue;
+            }
+
+            $missingKeys = array_diff($requiredKeys, array_keys($row));
+
+            if (!empty($missingKeys)) {
+                $exceptionLogs[] = ["message" => "Missing required keys: " . implode(', ', $missingKeys) . " - Error occurred at record " . $index];
+                continue;
+            }
+
+            if (!$row['new-price'] || !$row['old-price'] || !$row['discount-percent'] || !$row['images']) continue;
+
+            if (!in_array($row['website-id'], $existingProductsByWebsiteId)) {
+                $productProcessor->createNewProduct($row, $formatedPriceRoles);
+                $newProducts++;
+            } else {
+                $existingProduct = $productRepository->findOneBy(['websiteId' => $row['website-id']]);
+                $existingProduct = $productProcessor->checkIfProductUpdated($row, $existingProduct);
+                $existingProduct->setForDelete(false);
+                $entityManager->persist($existingProduct);
+                $existingProducts++;
+            }
+            if($batchCounter++ >= $batchLimit) {
+                $entityManager->flush();
+                $batchCounter = 0;
+            }
+        }
+        $entityManager->flush(); //Flush products stacked in the batch
+
+        return new JsonResponse(
+            [
+                'choiceProductsArray' => $choiceProductsArray,
+                'exceptionLogs' => $exceptionLogs,
+                'newProducts' =>$newProducts,
+                'existingProducts' => $existingProducts
+            ],
+            200);
     }
 
+    #[Route('/admin/process-choices', name: 'app_admin_choices_process', methods: 'POST')]
+    public function processChoices(Request $request, ProductProcessor $productProcessor){
+        $requestBody = json_decode($request->getContent(), true);
+        $choiceProductsArray = $requestBody['choiceProducts'];
+        if(empty($choiceProductsArray)){
+            return new JsonResponse(['error' => 'No choices to process'], 404);
+        }
+        $result = $productProcessor->createProductChoices($choiceProductsArray);
+        $productProcessor->createProductOptions();
+
+        return new JsonResponse([
+            'message' => 'Choices successfully processed',
+            'newChoices' => $result['newChoices'],
+            'existingChoices' => $result['existingChoices'],
+            'exceptionLogs' => $result['exceptionLogs']
+        ], 200);
+    }
+
+    #[Route('/admin/delete-missing-products-and-choices', name: 'app_admin_delete_products_and_choices', methods: 'POST')]
+    public function deleteMissingProductsAndChoices(ProductRepository $productRepository, Request $request){
+        $requestBody = json_decode($request->getContent(), true);
+        $website = $requestBody['website'];
+
+        $result = $productRepository->deleteALlMissingProducts($website);
+        $productRepository->refreshForDeleteField();
+
+        return new JsonResponse([
+            'removedProducts' => $result['removedProducts'],
+            'removedChoices' => $result['removedChoices']
+        ], 200);
+    }
 }

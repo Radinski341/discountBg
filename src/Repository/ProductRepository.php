@@ -163,15 +163,17 @@ class ProductRepository extends ServiceEntityRepository
             ->execute();
     }
 
-    public function deleteAllMissingProducts($website): bool
+    public function deleteAllMissingProducts($website): array
     {
         $productsForDelete = $this->findBy(['forDelete' => true, 'websiteName' => $website]);
         dump($productsForDelete);
         if (count($productsForDelete) === 0) {
-            return false;
+            return ['removedProducts' => 0, 'removedChoices' => 0];
         }
         $batchLimit = 50;
         $batchCount = 0;
+        $removedProducts = 0;
+        $removedChoices = 0;
         foreach ($productsForDelete as $product) {
             foreach ($product->getProductOrders() as $productOrder) {
                 $this->_em->remove($productOrder);
@@ -188,14 +190,20 @@ class ProductRepository extends ServiceEntityRepository
                     $this->_em->remove($productOrder);
                 }
                 $this->_em->remove($productChoice);
+                $removedChoices++;
             }
             $this->_em->remove($product);
+            $removedProducts++;
             if($batchCount++ >= $batchLimit) {
                 $this->_em->flush();
                 $batchCount = 0;
             }
         }
-        return true;
+        $this->_em->flush(); // Remove rest stacked in the batch
+        return [
+            'removedProducts' => $removedProducts,
+            'removedChoices' => $removedChoices
+        ];
     }
 
     public function getAllActiveProductsId(): array

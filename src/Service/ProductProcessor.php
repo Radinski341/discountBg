@@ -173,21 +173,44 @@ class ProductProcessor
             $currentData['discount-percent'] !== $product->getOriginalDiscountPercent() ||
             $currentData['old-price'] !== $product->getOldPrice()
         ){
+            $newDiscountPercent = $this->newDiscountPercentLogic($currentData['new-price'], $currentData['discount-percent']);
             $product->setOldPrice($currentData['old-price']);
             $product->setOriginalDiscountPercent($currentData['discount-percent']);
             $product->setOriginalDiscountPrice($currentData['new-price']);
-            $product->setNewPrice($this->newPriceLogic($currentData['new-price']));
-            $product->setDiscountPercent($this->newDiscountPercentLogic($currentData['discount-percent']));
+            $product->setNewPrice($this->newPriceLogic($currentData['old-price'], $newDiscountPercent));
+            $product->setDiscountPercent($newDiscountPercent);
             $product->setUpdatedAt(new \DateTime());
         }
         return $product;
     }
 
-    public function createProductChoices($productChoices): void
+    public function createProductChoices($productChoices): array
     {
+        $newChoices = 0;
+        $existingChoices = 0;
+        $exceptionLogs = [];
         $existingProductChoices = $this->productChoiceRepository->findAllProductsWebsiteId();
-        foreach ($productChoices as $productChoice){
+        foreach ($productChoices as $index => $productChoice){
+            $requiredKeys = [
+                'is-product-choice',
+                'website',
+                'parent-website-id',
+                'website-id',
+                'product-url',
+                'title',
+                'old-price',
+                'new-price',
+                'discount-percent',
+                'images'
+            ];
+            $missingKeys = array_diff($requiredKeys, array_keys($productChoice));
+
+            if (!empty($missingKeys)) {
+                $exceptionLogs[] = ["message" => "Missing required keys: " . implode(', ', $missingKeys) . " - Error occurred at record " . $index];
+                continue;
+            }
             $productParent = $this->productRepository->findOneBy(['websiteId' => $productChoice['parent-website-id']]);
+            $newDiscountPercent = $this->newDiscountPercentLogic($productChoice['new-price'], $productChoice['discount-percent']);
             if($productParent ){
                 if(!in_array($productChoice['website-id'], $existingProductChoices)){
                     $product = new ProductChoice();
@@ -200,21 +223,28 @@ class ProductProcessor
                     $product->setOptionValue($productChoice['option']);
                     $product->setOldPrice($productChoice['old-price']);
                     $product->setOriginalDiscountPrice($productChoice['new-price']);
-                    $product->setNewPrice($this->newPriceLogic($productChoice['new-price']));
+                    $product->setNewPrice($this->newPriceLogic($productChoice['old-price'], $newDiscountPercent));
                     $product->setImages($productChoice['images']);
                     $product->setOriginalDiscountPercent($productChoice['discount-percent']);
-                    $product->setDiscountPercent($this->newDiscountPercentLogic($productChoice['discount-percent']));
+                    $product->setDiscountPercent($newDiscountPercent);
                     $product->setForDelete(false);
                     $this->entityManager->persist($product);
+                    $newChoices++;
                 }else{
                     $existingProductChoice = $this->getExistingProductChoice($productChoice['website-id']);
                     $existingProductChoice->setForDelete(false);
                     $this->entityManager->persist($existingProductChoice);
+                    $existingChoices++;
                 }
             }
 
         }
         $this->entityManager->flush();
+        return [
+            'newChoices' => $newChoices,
+            'existingChoices' => $existingChoices,
+            'exceptionLogs' => $exceptionLogs,
+        ];
     }
 
     public function createProductOptions(): void
