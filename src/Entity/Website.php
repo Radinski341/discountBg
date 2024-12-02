@@ -24,6 +24,9 @@ class Website
     #[ORM\Column(type: 'float')]
     private float $freeDeliveryOver = 0;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $processedAt = null;
+
     public function __construct()
     {
         $this->websiteDeliveryRoles = new ArrayCollection();
@@ -91,5 +94,17 @@ class Website
     public function __toString(): string
     {
         return $this->websiteName;
+    }
+
+    public function getProcessedAt(): ?\DateTimeImmutable
+    {
+        return $this->processedAt;
+    }
+
+    public function setProcessedAt(?\DateTimeImmutable $processedAt): static
+    {
+        $this->processedAt = $processedAt;
+
+        return $this;
     }
 }

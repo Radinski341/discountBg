@@ -21,7 +21,9 @@
             <div {{ stimulus_controller('website-toggle') }} class="mb-3">
                 <!-- Header with Website Name and Expand/Hide Button -->
                 <div data-website-toggle-target="header" class="d-flex justify-content-between align-items-center bg-dark p-3 rounded border">
-                    <span class="fw-bold">{{ website | capitalize }} - {{ files[website] | length }} active files</span>
+                    <span class="fw-bold w-25">{{ website | capitalize }}</span>
+                    <span class="fw-bold w-25"> {{ files[website] | length }} files</span>
+                    <span class="fw-bold w-25">Last processed on: {{ websites[website].processedAt ? websites[website].processedAt|date('Y-m-d H:i:s') : '/' }}</span>
                     <button data-action="click->website-toggle#toggle" data-website-toggle-target="toggleButton" class="btn btn-primary btn-sm">
                         Expand
                     </button>

@@ -28,31 +28,33 @@ class DataUploadController extends AbstractController
     #[Route('/admin/upload-data', 'app_admin_data_upload')]
     public function uploadFile(Request $request, AdminUrlGenerator $adminUrlGenerator, WebsiteRepository $websiteRepository): Response
     {
-        $websites = [];
-        foreach ($websiteRepository->findAll() as $website){
-            $websites[] = $website->getWebsiteName();
+        $websites = $websiteRepository->findAll();
+        $associatedWebsites = [];
+        foreach ($websites as $website) {
+            $associatedWebsites[$website->getWebsiteName()] = $website;
         }
         $forms = [];
         $fileNames = [];
         foreach ($websites as $website) {
-            $url = $adminUrlGenerator->setRoute('app_admin_data_upload')->set('website', $website)->generateUrl();
+            $websiteName = $website->getWebsiteName();
+            $url = $adminUrlGenerator->setRoute('app_admin_data_upload')->set('website', $websiteName)->generateUrl();
             $form = $this->createForm(DataUploadType::class, null ,[
                 'action' => $url
             ]);
-            $forms[$website] = $form->createView();
+            $forms[$websiteName] = $form->createView();
 
-            $folderPath = $this->getParameter('kernel.project_dir').'/src/Data/'.$website;
+            $folderPath = $this->getParameter('kernel.project_dir').'/src/Data/'.$websiteName;
             if(!is_dir($folderPath)){
                 mkdir($folderPath, 0755, true);
             }
             $finder = new Finder();
             $files = $finder->files()->in($folderPath);
-            $fileNames[$website] = [];
+            $fileNames[$websiteName] = [];
             foreach ($files as $file) {
-                $fileNames[$website][] = $file->getFilename();
+                $fileNames[$websiteName][] = $file->getFilename();
             }
 
-            if($request->query->get('website') === $website){
+            if($request->query->get('website') === $websiteName){
                 $form->handleRequest($request);
                 if($form->isSubmitted() && $form->isValid()){
                     $uploadedFiles = $form['file']->getData();
@@ -72,7 +74,8 @@ class DataUploadController extends AbstractController
 
         return $this->render('admin/file-upload.html.twig', [
             'forms' => $forms,
-            'files' => $fileNames
+            'files' => $fileNames,
+            'websites' => $associatedWebsites
         ]);
     }
     #[Route(path: '/admin/delete-file/{website}/{name}',name: 'app_admin_file_delete', methods: 'DELETE')]
@@ -246,11 +249,16 @@ class DataUploadController extends AbstractController
     }
 
     #[Route('/admin/delete-missing-products-and-choices', name: 'app_admin_delete_products_and_choices', methods: 'POST')]
-    public function deleteMissingProductsAndChoices(ProductRepository $productRepository, Request $request){
+    public function deleteMissingProductsAndChoices(ProductRepository $productRepository, Request $request, WebsiteRepository $websiteRepository, EntityManagerInterface $entityManager){
         $requestBody = json_decode($request->getContent(), true);
-        $website = $requestBody['website'];
+        $websiteName = $requestBody['website'];
 
-        $result = $productRepository->deleteALlMissingProducts($website);
+        $website = $websiteRepository->findOneBy(['websiteName' => $websiteName]);
+        $website->setProcessedAt(new \DateTimeImmutable('now'));
+        $entityManager->persist($website);
+        $entityManager->flush();
+
+        $result = $productRepository->deleteALlMissingProducts($websiteName);
         $productRepository->refreshForDeleteField();
 
         return new JsonResponse([
