@@ -35,10 +35,21 @@ export default class extends Controller {
         const files = await this.getFiles(currentTarget);
 
         if (files.length === 0) {
-            const deletionResponse = await this.deleteProductsAndChoices(currentTarget);
+            let removedProducts = 0
+            let removedChoices = 0
+            let productsForDelete = true
+            while (productsForDelete){
+                const deletionResponse = await this.deleteProductsAndChoices(currentTarget);
+                removedProducts += deletionResponse['removedProducts']
+                removedChoices += deletionResponse['removedChoices']
+                this.logsContainerTarget.innerHTML += `<p class="text-success">${getTime()} - Removed | Products: ${removedProducts} | Choices: ${removedChoices}`
+                if(deletionResponse['productsForDeleteLeft'] === 0){
+                    productsForDelete = false
+                }
+            }
             this.logsContainerTarget.innerHTML += `<p>--------------------------------------RESULT---------------------------------------------------</p>`
-            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW PRODUCTS - 0</span> | <span class="text-danger"> REMOVED PRODUCTS - ${deletionResponse['removedProducts']}</span></p>`
-            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW CHOICES  - 0</span> | <span class="text-danger"> REMOVED CHOICES: ${deletionResponse['removedChoices']}</span></p>`
+            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW PRODUCTS - 0</span> | <span class="text-danger"> REMOVED PRODUCTS - ${removedProducts}</span></p>`
+            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW CHOICES  - 0</span> | <span class="text-danger"> REMOVED CHOICES: ${removedChoices}</span></p>`
 
             const finish = Date.now(); // Record the end time in milliseconds
             const durationInSeconds = (finish - start) / 1000;
@@ -72,26 +83,46 @@ export default class extends Controller {
             }
             totalProducts += response['newProducts'];
         }
-        let choicesResponse;
+        let totalNewChoices = 0;
         if(choicesArray.length > 0){
-            this.logsContainerTarget.innerHTML += `<p>${getTime()} - Proccessing ${choicesArray.length} choices...</p>`
-            choicesResponse = await this.processChoices(currentTarget, choicesArray);
-            this.logsContainerTarget.innerHTML += `<p class="text-success">${getTime()} - Choices | New: ${choicesResponse['newChoices']} | Updated: ${choicesResponse['existingChoices']}</p>`;
-            if(choicesResponse['exceptionLogs'].length > 0){
-                choicesResponse['exceptionLogs'].forEach(log => {
-                    this.logsContainerTarget.innerHTML += `<p class="text-danger">${getTime()} - ${log.message}</p>`
-                })
+            let choicesBatch = 500
+            let batchCount = 1;
+            while(choicesArray.length > choicesBatch * (batchCount - 1)){
+                let choicesForProcess = choicesArray.slice(choicesBatch * (batchCount - 1), choicesBatch * batchCount)
+                this.logsContainerTarget.innerHTML += `<p>${getTime()} - Proccessing batch ${batchCount} / ${Math.ceil(choicesArray.length / choicesBatch)} with ${choicesForProcess.length} choices...</p>`
+                let choicesResponse = await this.processChoices(currentTarget, choicesForProcess);
+                console.log(choicesResponse)
+                totalNewChoices += choicesResponse['newChoices'];
+                this.logsContainerTarget.innerHTML += `<p class="text-success">${getTime()} - Choices | New: ${choicesResponse['newChoices']} | Updated: ${choicesResponse['existingChoices']}</p>`;
+                if(choicesResponse['exceptionLogs'].length > 0){
+                    choicesResponse['exceptionLogs'].forEach(log => {
+                        this.logsContainerTarget.innerHTML += `<p class="text-danger">${getTime()} - ${log.message}</p>`
+                    })
+                }
+                scrollToBottom()
+                batchCount++
             }
-            scrollToBottom()
+
+        }
+        let removedProducts = 0
+        let removedChoices = 0
+        let productsForDelete = true
+        while (productsForDelete){
+            const deletionResponse = await this.deleteProductsAndChoices(currentTarget);
+            removedProducts += deletionResponse['removedProducts']
+            removedChoices += deletionResponse['removedChoices']
+            this.logsContainerTarget.innerHTML += `<p class="text-success">${getTime()} - Removed | Products: ${removedProducts} | Choices: ${removedChoices}`
+            if(deletionResponse['productsForDeleteLeft'] === 0){
+                productsForDelete = false
+            }
         }
 
-        const deletionResponse = await this.deleteProductsAndChoices(currentTarget);
-        this.logsContainerTarget.innerHTML += `<p class="text-success">${getTime()} - Removed | Products: ${deletionResponse['removedProducts']} | Choices: ${deletionResponse['removedChoices']}`
+
 
         this.logsContainerTarget.innerHTML += `<p>--------------------------------------------RESULT----------------------------------------------------</p>`
-        this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW PRODUCTS - ${totalProducts}</span> | <span class="text-danger"> REMOVED PRODUCTS - ${deletionResponse['removedProducts']}</span></p>`
+        this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW PRODUCTS - ${totalProducts}</span> | <span class="text-danger"> REMOVED PRODUCTS - ${removedProducts}</span></p>`
         if(choicesArray.length > 0){
-            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW CHOICES  - ${choicesResponse['newChoices']}</span> | <span class="text-danger"> REMOVED CHOICES: ${deletionResponse['removedChoices']}</span></p>`
+            this.logsContainerTarget.innerHTML += `<p><span class="text-success"> NEW CHOICES  - ${totalNewChoices}</span> | <span class="text-danger"> REMOVED CHOICES: ${removedChoices}</span></p>`
 
         }
 
@@ -150,37 +181,46 @@ export default class extends Controller {
     }
 
     async processProducts(currentTarget, file){
-        const processProductsBody = JSON.stringify({ website: currentTarget.dataset.website, fileName: file});
-        const response = await fetch(this.processProductsUrlValue, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: processProductsBody
-        })
-
-        if(!response.ok){
-            this.logsContainerTarget.innerHTML += 'Network response was not ok'
+        try {
+            const processProductsBody = JSON.stringify({website: currentTarget.dataset.website, fileName: file});
+            const response = await fetch(this.processProductsUrlValue, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: processProductsBody
+            })
+            const data = await response.json()
+            if (!response.ok) {
+                this.logsContainerTarget.innerHTML += 'Network response was not ok'
+            }
+    console.log(data)
+            return data
+        } catch (err){
+            console.error(err.message)
         }
-
-        return await response.json();
     }
 
     async processChoices(currentTarget, choicesArray){
-        const processChoicesBody = JSON.stringify({choiceProducts: choicesArray})
-        const response = await fetch(this.processChoicesUrlValue, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: processChoicesBody
-        })
+        try {
+            const processChoicesBody = JSON.stringify({choiceProducts: choicesArray})
+            const response = await fetch(this.processChoicesUrlValue, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: processChoicesBody
+            })
 
-        if(!response.ok){
-            this.logsContainerTarget.innerHTML += 'Network response was not ok while processing choices'
+            if(!response.ok){
+                this.logsContainerTarget.innerHTML += 'Network response was not ok while processing choices'
+            }
+
+            return await response.json();
+        } catch (err){
+            console.error(err.message)
         }
 
-        return await response.json();
     }
 
     async deleteProductsAndChoices(currentTarget){

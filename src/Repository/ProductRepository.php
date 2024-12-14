@@ -163,10 +163,22 @@ class ProductRepository extends ServiceEntityRepository
             ->execute();
     }
 
+    public function getNumberOfProductsForDelete($website)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.forDelete = :forDelete')
+            ->andWhere('p.websiteName = :websiteName')
+            ->setParameter('forDelete', true)
+            ->setParameter('websiteName', $website);
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
+
     public function deleteAllMissingProducts($website): array
     {
-        $productsForDelete = $this->findBy(['forDelete' => true, 'websiteName' => $website]);
-        dump($productsForDelete);
+        $productsForDelete = $this->findBy(['forDelete' => true, 'websiteName' => $website],null, 200);
+
         if (count($productsForDelete) === 0) {
             return ['removedProducts' => 0, 'removedChoices' => 0];
         }

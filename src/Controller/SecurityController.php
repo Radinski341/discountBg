@@ -65,7 +65,9 @@ class SecurityController extends AbstractController
     public function register(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, VerifyEmailHelperInterface $verifyEmailHelper, MailerService $mailerService) :Response
     {
 
-        $form = $this->createForm(RegisterFormType::class);
+        $form = $this->createForm(RegisterFormType::class, null, [
+            'validation_groups' => 'registration'
+        ]);
 
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid()){
@@ -101,48 +103,11 @@ class SecurityController extends AbstractController
             $entityManager->persist($cart);
             $entityManager->flush();
 
-            $signatures = $verifyEmailHelper->generateSignature(
-                'app_verify_email',
-                $user->getId(),
-                $user->getEmail(),
-                ['id' => $user->getId()]
-            );
-
-            $mailerService->sendEmail($user->getEmail(), 'Discount - BG Authentication', $signatures->getSignedUrl());
-
-            $this->addFlash('success', 'Успешно се регистрирахте. Моля активирайте вашият акаунт със линк кой изпратихме на вашия мейл.' . $signatures->getSignedUrl());
-
             return $this->redirectToRoute('app_login');
         }
         return $this->render('security/register.html.twig', [
             'form' => $form->createView()
         ]);
-    }
-
-    #[Route('/verify', name: 'app_verify_email')]
-    public function verifyUserEmail(Request $request, VerifyEmailHelperInterface $verifyEmailHelper, UserRepository $userRepository, EntityManagerInterface $entityManager)
-    {
-        $user = $userRepository->findOneBy(['id' => $request->query->get('id')]);
-        if(!$user) {
-            throw $this->createNotFoundException();
-        }
-
-        try {
-            $verifyEmailHelper->validateEmailConfirmation(
-                $request->getUri(),
-                $user->getId(),
-                $user->getEmail()
-            );
-            $user->setIsVerifyed(true);
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Успешно активирахте вашия профил, сега може да влезете в профила си');
-            return $this->redirectToRoute('app_login');
-        } catch (VerifyEmailExceptionInterface $exception) {
-            $this->addFlash('error', $exception->getReason());
-            return $this->redirectToRoute('app_login');
-        }
     }
 
     #[Route('change-password', name: 'app_change_password')]

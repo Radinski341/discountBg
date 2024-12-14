@@ -71,7 +71,6 @@ class ProductCrudController extends AbstractCrudController
             yield TextEditorField::new('description', 'Description')->setFormType(TextEditorType::class)->setNumOfRows(10);
 
 
-            yield CollectionField::new('productChoices', 'Product Choices')->allowAdd(false)->allowDelete();
         }
 
         if ($pageName === Crud::PAGE_DETAIL) {
@@ -94,7 +93,6 @@ class ProductCrudController extends AbstractCrudController
             yield CollectionField::new('productChoices', 'Product Choices')->allowAdd()->allowDelete();
             yield CollectionField::new('productOrders', 'Product Orders')->allowAdd()->allowDelete();
             yield CollectionField::new('favouriteOrders', 'Favourite Orders')->allowAdd()->allowDelete();
-            yield BooleanField::new('isFavourite', 'Is Favourite');
             yield NumberField::new('deliveryPrice', 'Delivery Price');
         }
     }

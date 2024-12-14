@@ -31,8 +31,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private string $password;
 
-    #[Assert\NotBlank(message: "Моля въведете парола")]
-    #[Assert\Length(min: 8, minMessage: "Паролата мора да е минимум 8 карактера")]
+    #[Assert\NotBlank(message: "Моля въведете парола", groups: ['registration'])]
+    #[Assert\Length(min: 8, minMessage: "Паролата мора да е минимум 8 карактера", groups: ['registration'])]
     private string $plainPassword;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
@@ -68,9 +68,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: "Моля въведете вашите имена")]
     #[Assert\Length(min: 5, max: 255, minMessage: 'Имената не може да са по малку од 5 карактера', maxMessage: 'Имената не може да са повече од 255 карактера')]
     private ?string $fullName = null;
-
-    #[ORM\Column(type: 'boolean')]
-    private ?bool $isVerifyed = false;
 
     public function __construct()
     {
@@ -311,18 +308,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFullName(string $fullName): static
     {
         $this->fullName = $fullName;
-
-        return $this;
-    }
-
-    public function isIsVerifyed(): ?bool
-    {
-        return $this->isVerifyed;
-    }
-
-    public function setIsVerifyed(bool $isVerifyed): static
-    {
-        $this->isVerifyed = $isVerifyed;
 
         return $this;
     }

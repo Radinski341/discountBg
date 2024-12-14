@@ -59,7 +59,6 @@ final class UserFactory extends ModelFactory
             'city' => self::faker()->city(),
             'populatedPlace' => self::faker()->city(),
             'fullName' => self::faker()->name(),
-            'isVerifyed' => true,
             'roles' => [],
         ];
     }

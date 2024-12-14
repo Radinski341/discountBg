@@ -234,9 +234,7 @@ class DataUploadController extends AbstractController
     public function processChoices(Request $request, ProductProcessor $productProcessor){
         $requestBody = json_decode($request->getContent(), true);
         $choiceProductsArray = $requestBody['choiceProducts'];
-        if(empty($choiceProductsArray)){
-            return new JsonResponse(['error' => 'No choices to process'], 404);
-        }
+
         $result = $productProcessor->createProductChoices($choiceProductsArray);
         $productProcessor->createProductOptions();
 
@@ -257,13 +255,16 @@ class DataUploadController extends AbstractController
         $website->setProcessedAt(new \DateTimeImmutable('now'));
         $entityManager->persist($website);
         $entityManager->flush();
-
+        $productsForDeleteLeftBefore = $productRepository->getNumberOfProductsForDelete($websiteName);
         $result = $productRepository->deleteALlMissingProducts($websiteName);
+        $productsForDeleteLeft = $productRepository->getNumberOfProductsForDelete($websiteName);
         $productRepository->refreshForDeleteField();
 
         return new JsonResponse([
             'removedProducts' => $result['removedProducts'],
-            'removedChoices' => $result['removedChoices']
+            'removedChoices' => $result['removedChoices'],
+            'productsForDeleteLeft' => $productsForDeleteLeft,
+            'productsForDeleteLeftBefore' => $productsForDeleteLeftBefore
         ], 200);
     }
 }

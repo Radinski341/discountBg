@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Banner;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -21,10 +22,6 @@ class BannerCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield ImageField::new('img')
-            ->setUploadDir('public/uploads/images')
-            ->setBasePath('uploads/images');
-
         yield TextField::new('url')
             ->setLabel('URL');
 
@@ -36,14 +33,25 @@ class BannerCrudController extends AbstractCrudController
             ->setLabel('Updated At')
             ->hideOnForm();
 
+        $imageField = ImageField::new('img')
+            ->setUploadDir('public/uploads/images')
+            ->setBasePath('uploads/images');
+
+        if (Crud::PAGE_EDIT === $pageName) {
+            $imageField->setRequired(false); // Ensure it's not mandatory during edit
+        }
+
+        yield $imageField;
+
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if ($entityInstance instanceof Banner) {
             $now = new \DateTimeImmutable();
+            $nowMutable = new \DateTime();
             $entityInstance->setCreatedAt($now);
-            $entityInstance->setUpdatedAt($now); // Set updatedAt as well on creation
+            $entityInstance->setUpdatedAt($nowMutable); // Set updatedAt as well on creation
         }
 
         parent::persistEntity($entityManager, $entityInstance);
@@ -53,7 +61,7 @@ class BannerCrudController extends AbstractCrudController
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         if ($entityInstance instanceof Banner) {
-            $now = new \DateTimeImmutable();
+            $now = new \DateTime();
             $entityInstance->setUpdatedAt($now); // Set updatedAt on every update
         }
 
