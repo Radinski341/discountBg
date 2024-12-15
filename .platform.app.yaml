@@ -1,0 +1,50 @@
+name: app
+
+type: php:8.2
+
+runtime:
+    extensions:
+        - apcu
+        - mbstring
+        - sodium
+        - iconv
+        - ctype
+        - gd
+        - intl
+        - pdo_pgsql
+        
+
+#variables:
+#    php:
+#        # uncomment on PHP 7.4+
+#        #opcache.preload: config/preload.php
+
+build:
+    flavor: composer
+    commands:
+        - composer install --no-dev --optimize-autoloader
+
+disk: 512
+
+web:
+    locations:
+        "/":
+            root: "public"
+            expires: 1h
+            passthru: "/index.php"
+
+
+
+mounts:
+    "/var/www/html/var": "tmp"
+
+
+
+hooks:
+    build: |
+        yarn install --frozen-lockfile
+        yarn build
+
+    deploy: |
+        php bin/console doctrine:database:create --if-not-exists
+        php bin/console doctrine:migrations:migrate --no-interaction
