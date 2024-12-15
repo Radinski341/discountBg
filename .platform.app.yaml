@@ -40,7 +40,7 @@ mounts:
 
 hooks:
     build: |
-        composer install --no-dev --optimize-autoloader
+        composer install
         yarn install --frozen-lockfile
         yarn build
     deploy: |
