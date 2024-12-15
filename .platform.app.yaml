@@ -21,8 +21,6 @@ runtime:
 
 build:
     flavor: composer
-    commands:
-        - composer install --no-dev --optimize-autoloader
 
 disk: 512
 
