@@ -36,15 +36,15 @@ web:
 
 
 mounts:
-    "/var/www/html/var": "tmp"
+    "/var/www/html/var": "shared:files/var"
 
 
 
 hooks:
     build: |
+        composer install --no-dev --optimize-autoloader
         yarn install --frozen-lockfile
         yarn build
-
     deploy: |
         php bin/console doctrine:database:create --if-not-exists
         php bin/console doctrine:migrations:migrate --no-interaction
