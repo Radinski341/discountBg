@@ -13,6 +13,9 @@ framework:
         cookie_lifetime: 7200    # 2 hours
         gc_maxlifetime: 7200
 
+    cache:
+        directory: '%kernel.project_dir%/var/cache'
+
     #esi: true
     #fragments: true
     php_errors:
