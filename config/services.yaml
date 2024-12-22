@@ -25,7 +25,26 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    Aws\S3\S3Client:
+        class: Aws\S3\S3Client
+        arguments:
+            - version: 'latest'
+              region: '%env(AWS_REGION)%'
+              credentials:
+                  key: '%env(AWS_ACCESS_KEY_ID)%'
+                  secret: '%env(AWS_SECRET_ACCESS_KEY)%'
 
+    s3.adapter:
+        class: League\Flysystem\AwsS3V3\AwsS3V3Adapter
+        arguments:
+            $client: '@Aws\S3\S3Client'
+            $bucket: '%env(AWS_BUCKET_NAME)%'
+            $prefix: ''
+
+    s3.storage:
+        class: League\Flysystem\Filesystem
+        arguments:
+            - '@s3.adapter'
 
 
 

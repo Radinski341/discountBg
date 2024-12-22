@@ -13,6 +13,8 @@
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^2.17",
         "easycorp/easyadmin-bundle": "^4.8",
+        "league/flysystem-aws-s3-v3": "*",
+        "league/flysystem-bundle": "^3.3",
         "pagerfanta/doctrine-orm-adapter": "^4.2",
         "pagerfanta/twig": "^4.2",
         "stof/doctrine-extensions-bundle": "^1.10",
@@ -101,6 +103,6 @@
         "symfony/maker-bundle": "^1.52",
         "symfony/stopwatch": "7.0.*",
         "symfony/web-profiler-bundle": "7.0.*",
-        "zenstruck/foundry": "^2.0"
+        "zenstruck/foundry": "^1.19"
     }
 }

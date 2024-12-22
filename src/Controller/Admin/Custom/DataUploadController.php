@@ -15,6 +15,7 @@ use App\Service\ProductProcessor;
 use Doctrine\DBAL\SQL\Parser\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use League\Flysystem\FilesystemOperator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class DataUploadController extends AbstractController
 {
     #[Route('/admin/upload-data', 'app_admin_data_upload')]
-    public function uploadFile(Request $request, AdminUrlGenerator $adminUrlGenerator, WebsiteRepository $websiteRepository): Response
+    public function uploadFile(Request $request, AdminUrlGenerator $adminUrlGenerator, WebsiteRepository $websiteRepository, FilesystemOperator $s3Storage): Response
     {
         $websites = $websiteRepository->findAll();
         $associatedWebsites = [];
@@ -43,15 +44,11 @@ class DataUploadController extends AbstractController
             ]);
             $forms[$websiteName] = $form->createView();
 
-            $folderPath = $this->getParameter('kernel.project_dir').'/src/Data/'.$websiteName;
-            if(!is_dir($folderPath)){
-                mkdir($folderPath, 0755, true);
-            }
-            $finder = new Finder();
-            $files = $finder->files()->in($folderPath);
             $fileNames[$websiteName] = [];
-            foreach ($files as $file) {
-                $fileNames[$websiteName][] = $file->getFilename();
+            foreach ($s3Storage->listContents("data/$websiteName", false) as $file) {
+                if ($file->isFile()) { // Check if it's a file
+                    $fileNames[$websiteName][] = basename($file->path()); // Use path() to get the full file path
+                }
             }
 
             if($request->query->get('website') === $websiteName){
@@ -60,11 +57,10 @@ class DataUploadController extends AbstractController
                     $uploadedFiles = $form['file']->getData();
 
                     foreach ($uploadedFiles as $uploadedFile){
-                        $destination = $folderPath;
                         $originalFileName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
                         $newFileName = $originalFileName.'.'.$uploadedFile->guessExtension();
 
-                        $uploadedFile->move($destination, $newFileName);
+                        $s3Storage->write("data/$websiteName/$newFileName", file_get_contents($uploadedFile->getPathname()));
                     }
                     $targetUrl = $adminUrlGenerator->setRoute('app_admin_data_upload')->generateUrl();
                     return $this->redirect($targetUrl);
@@ -78,13 +74,18 @@ class DataUploadController extends AbstractController
             'websites' => $associatedWebsites
         ]);
     }
-    #[Route(path: '/admin/delete-file/{website}/{name}',name: 'app_admin_file_delete', methods: 'DELETE')]
-    public function deleteFile(string $name, string $website, AdminUrlGenerator $adminUrlGenerator)
-    {
-        $folderPath = $this->getParameter('kernel.project_dir').'/src/Data/'.$website;
-        $file = $folderPath.'/'.$name;
-        if(file_exists($file)){
-            unlink($file);
+    #[Route(path: '/admin/delete-file/{website}/{name}', name: 'app_admin_file_delete', methods: ['DELETE'])]
+    public function deleteFile(
+        string $name,
+        string $website,
+        AdminUrlGenerator $adminUrlGenerator,
+        FilesystemOperator $s3Storage
+    ) {
+        $filePath = "data/$website/$name";
+
+        // Delete the file from S3
+        if ($s3Storage->fileExists($filePath)) {
+            $s3Storage->delete($filePath);
         }
 
         $targetUrl = $adminUrlGenerator->setRoute('app_admin_data_upload')->generateUrl();
@@ -92,59 +93,67 @@ class DataUploadController extends AbstractController
     }
 
     #[Route('/admin/get-files', name: 'app_admin_get_files', methods: ['POST'])]
-    public function getFiles(Request $request): JsonResponse
+    public function getFiles(Request $request, FilesystemOperator $s3Storage): JsonResponse
     {
         $requestBody = json_decode($request->getContent(), true);
         $website = $requestBody['website'];
 
-        $folderPath = $this->getParameter('kernel.project_dir') . '/src/Data/' . $website . '/';
+        $folderPath = "data/$website/";
 
-        if (!is_dir($folderPath)) {
-            return new JsonResponse(['error' => 'Directory not found'], 404);
+        try {
+            $files = $s3Storage->listContents($folderPath);
+
+            $fileNames = [];
+            foreach ($files as $file) {
+                if ($file->isFile()) {
+                    $fileNames[] = basename($file->path());
+                }
+            }
+
+            return new JsonResponse($fileNames, 200);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Failed to fetch files: ' . $e->getMessage()], 500);
         }
-
-        $finder = new Finder();
-        $files = $finder->files()->in($folderPath);
-
-        $fileNames = [];
-        foreach ($files as $file) {
-            $fileNames[] = $file->getFilename();
-        }
-
-        return new JsonResponse($fileNames, 200);
     }
 
-    #[Route('/admin/process-categories', name: 'app_admin_category_process', methods: 'POST')]
-    public function processCategories(CategoryProcessor $categoryProcessor, Request $request)
-    {
+
+    #[Route('/admin/process-categories', name: 'app_admin_category_process', methods: ['POST'])]
+    public function processCategories(
+        CategoryProcessor $categoryProcessor,
+        Request $request,
+        FilesystemOperator $s3Storage
+    ): JsonResponse {
         $requestBody = json_decode($request->getContent(), true);
         $website = $requestBody['website'];
         $fileName = $requestBody['fileName'];
 
-        $filePath = $this->getParameter('kernel.project_dir') . '/src/Data/' . $website . '/' . $fileName;
-        if(!file_exists($filePath)){
-            return new JsonResponse(['error' => 'File not found' . $filePath], 404);
+        $filePath = "data/$website/$fileName";
+
+        if (!$s3Storage->fileExists($filePath)) {
+            return new JsonResponse(['error' => 'File not found: ' . $filePath], 404);
         }
-        $jsonData = file_get_contents($filePath);
+
+        $jsonData = $s3Storage->read($filePath);
         $data = json_decode($jsonData, true);
 
         if (!$data) {
             return new JsonResponse(['error' => 'No data found in ' . $fileName], 404);
         }
+
         $categoryProcessor->processCategories($data);
         return new JsonResponse(['message' => $fileName . ' processed successfully'], 200);
-
     }
 
-    #[Route('/admin/process-data', name: 'app_admin_data_process', methods: 'POST')]
+
+    #[Route('/admin/process-data', name: 'app_admin_data_process', methods: ['POST'])]
     public function processData(
         ProductProcessor $productProcessor,
         ProductRepository $productRepository,
         EntityManagerInterface $entityManager,
         Request $request,
-        WebsiteRepository $websiteRepository
-    ): Response
-    {
+        WebsiteRepository $websiteRepository,
+        FilesystemOperator $s3Storage
+    ): Response {
         $requiredKeys = [
             'is-product-choice',
             'website',
@@ -167,9 +176,16 @@ class DataUploadController extends AbstractController
         $website = $requestBody['website'];
         $fileName = $requestBody['fileName'];
 
-        $filePath = $this->getParameter('kernel.project_dir') . '/src/Data/' . $website . '/' . $fileName;
-        if(!file_exists($filePath)){
-            return new JsonResponse(['error' => 'File not found' . $filePath], 404);
+        $filePath = "data/$website/$fileName";
+        if (!$s3Storage->fileExists($filePath)) {
+            return new JsonResponse(['error' => 'File not found: ' . $filePath], 404);
+        }
+
+        $jsonData = $s3Storage->read($filePath);
+        $data = json_decode($jsonData, true);
+
+        if (!$data) {
+            return new JsonResponse(['error' => 'No data found in ' . $fileName], 404);
         }
 
         $existingProductsByWebsiteId = $productRepository->findAllProductsWebsiteId($website);
@@ -184,8 +200,6 @@ class DataUploadController extends AbstractController
         }
         $choiceProductsArray = [];
 
-        $jsonData = file_get_contents($filePath);
-        $data = json_decode($jsonData, true);
         $batchLimit = 50;
         $batchCounter = 0;
         foreach ($data as $index => $row) {
@@ -197,11 +211,15 @@ class DataUploadController extends AbstractController
             $missingKeys = array_diff($requiredKeys, array_keys($row));
 
             if (!empty($missingKeys)) {
-                $exceptionLogs[] = ["message" => "Missing required keys: " . implode(', ', $missingKeys) . " - Error occurred at record " . $index];
+                $exceptionLogs[] = [
+                    "message" => "Missing required keys: " . implode(', ', $missingKeys) . " - Error occurred at record " . $index
+                ];
                 continue;
             }
 
-            if (!$row['new-price'] || !$row['old-price'] || !$row['discount-percent'] || !$row['images']) continue;
+            if (!$row['new-price'] || !$row['old-price'] || !$row['discount-percent'] || !$row['images']) {
+                continue;
+            }
 
             if (!in_array($row['website-id'], $existingProductsByWebsiteId)) {
                 $productProcessor->createNewProduct($row, $formatedPriceRoles);
@@ -213,22 +231,26 @@ class DataUploadController extends AbstractController
                 $entityManager->persist($existingProduct);
                 $existingProducts++;
             }
-            if($batchCounter++ >= $batchLimit) {
+
+            if ($batchCounter++ >= $batchLimit) {
                 $entityManager->flush();
                 $batchCounter = 0;
             }
         }
-        $entityManager->flush(); //Flush products stacked in the batch
+
+        $entityManager->flush(); // Flush products stacked in the batch
 
         return new JsonResponse(
             [
                 'choiceProductsArray' => $choiceProductsArray,
                 'exceptionLogs' => $exceptionLogs,
-                'newProducts' =>$newProducts,
+                'newProducts' => $newProducts,
                 'existingProducts' => $existingProducts
             ],
-            200);
+            200
+        );
     }
+
 
     #[Route('/admin/process-choices', name: 'app_admin_choices_process', methods: 'POST')]
     public function processChoices(Request $request, ProductProcessor $productProcessor){
@@ -258,7 +280,10 @@ class DataUploadController extends AbstractController
         $productsForDeleteLeftBefore = $productRepository->getNumberOfProductsForDelete($websiteName);
         $result = $productRepository->deleteALlMissingProducts($websiteName);
         $productsForDeleteLeft = $productRepository->getNumberOfProductsForDelete($websiteName);
-        $productRepository->refreshForDeleteField();
+        if($productsForDeleteLeft === 0){
+            $productRepository->refreshForDeleteField();
+        }
+
 
         return new JsonResponse([
             'removedProducts' => $result['removedProducts'],

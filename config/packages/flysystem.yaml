@@ -1,0 +1,8 @@
+flysystem:
+  storages:
+    s3.storage:
+      adapter: 'League\Flysystem\AwsS3V3\AwsS3Adapter'
+      options:
+        client: '@Aws\S3\S3Client'  # Registered service for the S3 client
+        bucket: '%env(AWS_BUCKET_NAME)%'  # Bucket name
+        prefix: ''  # Optional prefix for all files
