@@ -3,5 +3,5 @@ postgresql:
   disk: 512
 
 search:
-  type: elasticsearch:8.10
+  type: elasticsearch:7.10
   disk: 512
