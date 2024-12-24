@@ -34,10 +34,6 @@ web:
 mounts:
     "/var/www/html/var": "shared:files/var"
 
-postgresql:
-    type: postgresql:16
-    disk: 512
-
 relationships:
     database: "postgresql:postgresql"
 
