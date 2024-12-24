@@ -36,8 +36,7 @@ mounts:
 
 relationships:
     database: "postgresql:postgresql"
-
-
+    elasticsearch: 'search:elasticsearch'
 
 hooks:
     build: |
