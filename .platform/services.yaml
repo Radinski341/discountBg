@@ -1,7 +1,3 @@
 postgresql:
   type: postgresql:16
   disk: 512
-
-search:
-  type: elasticsearch:7.10
-  disk: 512

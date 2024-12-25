@@ -233,9 +233,9 @@ class ProductRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.isActive = true')
-            ->andWhere('p.title ILIKE :query')
+            ->andWhere('p.title LIKE :query')
             ->setParameter('query', '%' . $query . '%')
-            ->orWhere('p.title ILIKE :translatedQuery')
+            ->orWhere('p.title LIKE :translatedQuery')
             ->setParameter('translatedQuery', '%' . $translatedQuery . '%');
     }
 
@@ -243,9 +243,9 @@ class ProductRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.isActive = true')
-            ->andWhere('p.title ILIKE :query')
+            ->andWhere('p.title LIKE :query')
             ->setParameter('query', '%' . $query . '%')
-            ->orWhere('p.title ILIKE :translatedQuery')
+            ->orWhere('p.title LIKE :translatedQuery')
             ->setParameter('translatedQuery', '%' . $translatedQuery . '%')
             ->setMaxResults(10)
             ->getQuery()
