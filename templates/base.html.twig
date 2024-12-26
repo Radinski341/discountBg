@@ -34,12 +34,15 @@
                     <div class="banner-track" data-banner-target="track">
                         {% for banner in global.banners %}
                             <a class="banner-item" href="{{ banner.url }}" target="_blank">
-                                <img src="/uploads/images/{{ banner.img }}" alt="banner" />
+                                <img src="https://discount-bg.s3.eu-north-1.amazonaws.com/banner/{{ banner.img }}" alt="banner" />
                             </a>
                         {% endfor %}
                     </div>
                 </div>
                 {% block body %}{% endblock %}
+            <footer class="footer-container bg-dark d-flex align-items-center justify-content-center" style="height: 120px">
+                <p class="text-white">All rights reserved 2025 - Discount BG</p>
+            </footer>
             </div>
     </body>
 </html>

@@ -51,14 +51,10 @@ class RegisterFormType extends AbstractType
                     'placeholder' => '********'
                 ]
             ])
-            ->add('city', ChoiceType::class, [
-                'choices' => $this->cityService->getAllCities(),
-                'placeholder' => '---Избери Град---',
+            ->add('city', TextType::class, [
+                'placeholder' => 'Град',
                 'required' => true,
-                'label' => 'Град',
-                'attr' => [
-                    'data-city-target' => 'cityField'
-                ]
+                'label' => 'Град'
             ])
             ->add('populatedPlace', TextType::class, [
                 'required' => false,

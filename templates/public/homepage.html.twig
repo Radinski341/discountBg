@@ -111,7 +111,7 @@
                                                 <img src="{{ product.imagesList| length >= 2 ? product.imagesList[1] : 'https://st4.depositphotos.com/14953852/24787/v/450/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg' }}" class="card-img-top" alt="Product Image">
                                             </a>
                                             <div class="box">
-                                                <div class="ribbon left" style="color: #000;">&#8681;<strong>&ndash;{{ product.discountPercent }}%</strong>&#8681;</div>
+                                                <div class="ribbon left" style="color: #fff;">&#8681;<strong>&ndash;{{ product.discountPercent }}%</strong>&#8681;</div>
                                             </div>
                                         </div>
                                         <div class="card-body">
@@ -119,7 +119,7 @@
                                                 <h6 class="card-title mb-3">{{ product.title| length >= 60 ? product.title | u.truncate(60)~'...' : product.title }}</h6>
                                             </a>
                                             <p class="text-decoration-line-through text-secondary mb-0">{{ product.oldPrice }} лв.</p>
-                                            <h4 class="text-white float-start p-1 pb-0 pt-0" style="background-color: red"><strong>{{ product.newPrice }} лв.</strong></h4>
+                                            <h4 class="text-white float-start p-1 pb-0 pt-0 lobster-regular" style="background-color: red"><strong>{{ product.newPrice }} лв.</strong></h4>
                                             <div class="bottom-icons float-end justify-content-end" {{ stimulus_controller('product-info', {'slug': product.slug}) }}>
                                                 <button
                                                         class="badge text-danger p-1 border-0 bg-white bi {{ product.isFavourite ? 'bi-heart-fill' : 'bi-heart' }}"

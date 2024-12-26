@@ -29,9 +29,8 @@ class PersonalInfoFormType extends AbstractType
             ->add('fullName', TextType::class, [
                 'label' => 'Цяло име',
             ])
-            ->add('city', ChoiceType::class, [
+            ->add('city', TextType::class, [
                 'label' => 'Град',
-                'choices' => $this->cityService->getAllCities()
             ])
             ->add('populatedPlace', TextType::class, [
                 'label' => 'Населено място',

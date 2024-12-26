@@ -89,7 +89,6 @@ class CartEndpointController extends AbstractController
         }
 
         $entityManager->flush();
-        dump($cart->getProductOrders());
         return $this->render('public/partials/_cart-preview.html.twig', [
             'cart' => $cart
         ]);
