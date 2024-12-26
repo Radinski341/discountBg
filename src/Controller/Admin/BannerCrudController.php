@@ -11,7 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Form\Type\FileUploadType;
 use League\Flysystem\FilesystemOperator;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class BannerCrudController extends AbstractCrudController
 {
@@ -42,11 +44,11 @@ class BannerCrudController extends AbstractCrudController
             ->setLabel('Updated At')
             ->hideOnForm();
 
-        $imageField = ImageField::new('img')
+        $imageField = TextField::new('img')
             ->setLabel('Image')
-            ->setHelp('Upload will be stored in the S3 bucket in the banner directory.')
-            ->setUploadDir($uploadDir)
-            ->setBasePath('https://discount-bg.s3.eu-north-1.amazonaws.com/banner/');
+            ->setFormType(FileType::class);
+//            ->setHelp('Upload will be stored in the S3 bucket in the banner directory.')
+//            ->setBasePath('https://discount-bg.s3.eu-north-1.amazonaws.com/banner/');
 
         if (Crud::PAGE_EDIT === $pageName) {
             $imageField->setRequired(false); // Ensure it's not mandatory during edit
@@ -54,6 +56,19 @@ class BannerCrudController extends AbstractCrudController
 
         yield $imageField;
 
+        if($this->getContext()->getRequest()->files->get('Banner')) {
+
+            $uploadedFile = $this->getContext()->getRequest()->files->get('Banner')['img'];
+
+            if ($uploadedFile) {
+                $originalFileName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $newFileName = $originalFileName . '.' . $uploadedFile->guessExtension();
+
+                $filePath = "banner/$newFileName";
+
+                $this->s3Storage->write($filePath, file_get_contents($uploadedFile->getPathname()));
+            }
+        }
     }
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
@@ -64,26 +79,11 @@ class BannerCrudController extends AbstractCrudController
             $nowMutable = new \DateTime();
             $entityInstance->setCreatedAt($now);
             $entityInstance->setUpdatedAt($nowMutable); // Set updatedAt as well on creation
+            $uploadedFile = $this->getContext()->getRequest()->files->get('Banner')['img'];
+            $entityInstance->setImg($uploadedFile->getClientOriginalName());
         }
 
         parent::persistEntity($entityManager, $entityInstance);
-
-        $uploadedFile = $this->getContext()->getRequest()->files->get('Banner')['img']['file'];
-
-        if ($uploadedFile) {
-            $originalFileName = $uploadedFile->getClientOriginalName();
-
-            $filePath = "banner/$originalFileName";
-            $projectRoot = $this->getParameter('kernel.project_dir');
-
-            $uploadDir = $this->getParameter('kernel.environment') === 'dev' ? $projectRoot . '/tmp/' : '/tmp';
-            $vanishFilePath = $uploadDir . $uploadedFile->getClientOriginalName();
-            
-            $this->s3Storage->write($filePath, file_get_contents($vanishFilePath));
-            $entityInstance->setImg($filePath); // Update the S3 path in the entity
-
-            unlink($vanishFilePath);
-        }
     }
 
     // Override updateEntity to set updatedAt on update
