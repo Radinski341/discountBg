@@ -7,11 +7,40 @@ export default class extends Controller {
     connect() {
         this.currentIndex = 0;
         this.totalItems = this.trackTarget.children.length;
-        this.itemsPerView = 3; // We are showing 3 items per view
+        this.updateItemsPerView();
         this.maxIndex = Math.ceil(this.totalItems / this.itemsPerView) - 1; // Maximum index based on the number of full views
+
+        window.addEventListener('resize', this.handleResize.bind(this));
 
         this.startAutoScroll();
     }
+
+    updateItemsPerView() {
+        const screenWidth = window.innerWidth;
+
+        if (screenWidth > 900) {
+            this.itemsPerView = 3;
+        } else if (screenWidth > 550) {
+            this.itemsPerView = 2;
+        } else {
+            this.itemsPerView = 1;
+        }
+
+        // Update maxIndex when itemsPerView changes
+        this.maxIndex = Math.ceil(this.totalItems / this.itemsPerView) - 1;
+    }
+
+    handleResize() {
+        const previousItemsPerView = this.itemsPerView;
+        this.updateItemsPerView();
+
+        // If itemsPerView changes, reset the view
+        if (previousItemsPerView !== this.itemsPerView) {
+            this.currentIndex = Math.min(this.currentIndex, this.maxIndex);
+            this.updateView();
+        }
+    }
+
 
     startAutoScroll() {
         this.timer = setInterval(() => this.scroll(), this.intervalValue);
