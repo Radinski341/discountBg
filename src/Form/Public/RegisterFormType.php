@@ -52,7 +52,9 @@ class RegisterFormType extends AbstractType
                 ]
             ])
             ->add('city', TextType::class, [
-                'placeholder' => 'Град',
+                'attr' => [
+                    'placeholder' => 'Град'
+                ],
                 'required' => true,
                 'label' => 'Град'
             ])

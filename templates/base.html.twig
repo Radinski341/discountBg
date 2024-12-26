@@ -24,7 +24,7 @@
         }) }}
             {{ stimulus_action('global-quantity', 'changeCartQuantity', 'product-info:quantity-change') }}
     >
-            <div {{ stimulus_action('global-quantity', 'changeFavouriteTotal', 'product-info:favourite-total-change') }}>
+            <div {{ stimulus_action('global-quantity', 'changeFavouriteTotal', 'product-info:favourite-total-change') }} style="min-height: 90vh">
                 {% include 'public/partials/_main-nav.html.twig' %}
                 {% include 'public/partials/_category-nav.html.twig' %}
                 <div class="cart-preview-container d-none" data-global-quantity-target="cartPreview">
@@ -40,9 +40,9 @@
                     </div>
                 </div>
                 {% block body %}{% endblock %}
+            </div>
             <footer class="footer-container bg-dark d-flex align-items-center justify-content-center" style="height: 120px">
                 <p class="text-white">All rights reserved 2025 - Discount BG</p>
             </footer>
-            </div>
     </body>
 </html>
