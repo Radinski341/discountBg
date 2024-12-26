@@ -30,6 +30,7 @@ class BannerCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        $uploadDir = $this->getParameter('kernel.environment') === 'dev' ? 'tmp' : '/tmp';
         yield TextField::new('url')
             ->setLabel('URL');
 
@@ -44,7 +45,7 @@ class BannerCrudController extends AbstractCrudController
         $imageField = ImageField::new('img')
             ->setLabel('Image')
             ->setHelp('Upload will be stored in the S3 bucket in the banner directory.')
-            ->setUploadDir('tmp')
+            ->setUploadDir($uploadDir)
             ->setBasePath('https://discount-bg.s3.eu-north-1.amazonaws.com/banner/');
 
         if (Crud::PAGE_EDIT === $pageName) {
@@ -57,6 +58,7 @@ class BannerCrudController extends AbstractCrudController
 
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
+
         if ($entityInstance instanceof Banner) {
             $now = new \DateTimeImmutable();
             $nowMutable = new \DateTime();
@@ -70,9 +72,13 @@ class BannerCrudController extends AbstractCrudController
 
         if ($uploadedFile) {
             $originalFileName = $uploadedFile->getClientOriginalName();
+
             $filePath = "banner/$originalFileName";
             $projectRoot = $this->getParameter('kernel.project_dir');
-            $vanishFilePath = $projectRoot . '/tmp/' . $uploadedFile->getClientOriginalName();
+
+            $uploadDir = $this->getParameter('kernel.environment') === 'dev' ? $projectRoot . '/tmp/' : '/tmp';
+            $vanishFilePath = $uploadDir . $uploadedFile->getClientOriginalName();
+            
             $this->s3Storage->write($filePath, file_get_contents($vanishFilePath));
             $entityInstance->setImg($filePath); // Update the S3 path in the entity
 
