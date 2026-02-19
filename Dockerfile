@@ -1,6 +1,9 @@
 FROM php:8.2-fpm
 
 # Update and install dependencies
+
+COPY php.ini /usr/local/etc/php/
+
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
